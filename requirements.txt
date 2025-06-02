@@ -1,3 +1,9 @@
+# IMPORTANT: Install PyTorch with CUDA 12.8 support for optimal performance:
+# pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+#
+# CUDA 12.8 provides the best performance for all NVIDIA GPUs and is required for RTX 5090+
+# It's backward compatible with RTX 20 series and newer GPUs
+
 # Core dependencies
 torch>=2.7.0
 transformers>=4.20.0

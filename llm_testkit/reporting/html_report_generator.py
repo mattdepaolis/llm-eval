@@ -13,6 +13,9 @@ import numpy as np
 from collections import defaultdict
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+# Import enhanced model configuration utilities
+from ..models.model_config import get_comprehensive_model_info, get_model_architecture_info
+
 # Define CET timezone
 try:
     CET = ZoneInfo("Europe/Berlin")
@@ -458,6 +461,28 @@ def get_html_template() -> str:
             border-color: var(--danger-color);
             color: #991b1b;
         }}
+
+        .context-block {{
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            font-style: italic;
+        }}
+
+        .activity-label {{
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }}
     </style>
 </head>
 <body>
@@ -591,61 +616,9 @@ def get_html_template() -> str:
 </html>"""
 
 def extract_model_info(config: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract comprehensive model information from config."""
-    model_info = {
-        "name": "Unknown Model",
-        "parameters": "Not specified",
-        "architecture": "Not specified", 
-        "context_length": "Not specified",
-        "backend": "Unknown",
-        "quantization": "None",
-        "device_mapping": "Single GPU"
-    }
-    
-    # Extract model name and details
-    if 'model_args' in config:
-        model_args = config['model_args']
-        if 'pretrained=' in model_args:
-            model_info["name"] = model_args.replace('pretrained=', '').split(',')[0]
-        
-        # Check for device mapping
-        if 'device_map=auto' in model_args:
-            model_info["device_mapping"] = "Multi-GPU (Auto)"
-        
-        # Check for quantization
-        if 'load_in_4bit' in model_args or '4bit' in model_args:
-            model_info["quantization"] = "4-bit"
-        elif 'load_in_8bit' in model_args or '8bit' in model_args:
-            model_info["quantization"] = "8-bit"
-    
-    # Extract backend information
-    if 'model' in config:
-        model_info["backend"] = config['model'].upper()
-    
-    # Try to infer model size from name
-    name_lower = model_info["name"].lower()
-    if "7b" in name_lower:
-        model_info["parameters"] = "~7 billion"
-    elif "13b" in name_lower:
-        model_info["parameters"] = "~13 billion"
-    elif "70b" in name_lower:
-        model_info["parameters"] = "~70 billion"
-    elif "3b" in name_lower:
-        model_info["parameters"] = "~3 billion"
-    elif "1b" in name_lower:
-        model_info["parameters"] = "~1 billion"
-    
-    # Try to infer architecture from model name
-    if "llama" in name_lower:
-        model_info["architecture"] = "Llama (Transformer)"
-    elif "mistral" in name_lower:
-        model_info["architecture"] = "Mistral (Transformer)"
-    elif "gemma" in name_lower:
-        model_info["architecture"] = "Gemma (Transformer)"
-    elif "gpt" in name_lower:
-        model_info["architecture"] = "GPT (Transformer)"
-    
-    return model_info
+    """Extract comprehensive model information from config using enhanced model utilities."""
+    # Use the comprehensive model info function from models module
+    return get_comprehensive_model_info(config)
 
 def create_performance_badge(score: float, threshold_good: float = 70.0, threshold_fair: float = 50.0) -> str:
     """Create a performance badge based on score."""
@@ -764,37 +737,153 @@ def generate_executive_summary(results_data: Dict[str, Any], model_info: Dict[st
     return '\n'.join(html)
 
 def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, Any]) -> str:
-    """Generate model configuration section."""
+    """Generate comprehensive model configuration section."""
     html = ['<div class="card">']
     html.append('<h2>⚙️ Model Configuration</h2>')
     
+    # Basic Model Information Section
+    html.append('<h3>🔧 Basic Model Information</h3>')
     html.append('<div class="table-container">')
     html.append('<table>')
     html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
     html.append('<tbody>')
     
-    # Model information
-    html.append(f'<tr><td><strong>Model Name</strong></td><td>{model_info["name"]}</td></tr>')
-    html.append(f'<tr><td><strong>Parameters</strong></td><td>{model_info["parameters"]}</td></tr>')
-    html.append(f'<tr><td><strong>Architecture</strong></td><td>{model_info["architecture"]}</td></tr>')
-    html.append(f'<tr><td><strong>Backend</strong></td><td>{model_info["backend"]}</td></tr>')
-    html.append(f'<tr><td><strong>Quantization</strong></td><td>{model_info["quantization"]}</td></tr>')
-    html.append(f'<tr><td><strong>Device Mapping</strong></td><td>{model_info["device_mapping"]}</td></tr>')
+    basic_info = [
+        ("Model Name", model_info.get("name", "Unknown")),
+        ("Architecture", model_info.get("architecture", "Not specified")),
+        ("Parameters", model_info.get("parameters", "Not specified")),
+        ("Context Length", model_info.get("context_length", "Not specified")),
+        ("Backend", model_info.get("backend", "Unknown")),
+        ("Data Type", model_info.get("data_type", "Not specified")),
+        ("Quantization", model_info.get("quantization", "None")),
+        ("Revision", model_info.get("revision", "main")),
+    ]
     
-    # Generation parameters
-    if 'generation_args' in config:
-        gen_args = config['generation_args']
-        html.append('<tr><td colspan="2"><strong>Generation Settings</strong></td></tr>')
-        
-        for key, value in gen_args.items():
-            if isinstance(value, (int, float, str, bool)):
-                html.append(f'<tr><td>{key}</td><td>{value}</td></tr>')
+    for param, value in basic_info:
+        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
     
     html.append('</tbody>')
     html.append('</table>')
     html.append('</div>')
+    
+    # Hardware and Performance Configuration
+    html.append('<h3>🖥️ Hardware & Performance Configuration</h3>')
+    html.append('<div class="table-container">')
+    html.append('<table>')
+    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
+    html.append('<tbody>')
+    
+    hardware_info = [
+        ("Device Mapping", model_info.get("device_mapping", "Single GPU")),
+        ("Tensor Parallel Size", str(model_info.get("tensor_parallel_size", 1))),
+        ("Pipeline Parallel Size", str(model_info.get("pipeline_parallel_size", 1))),
+        ("GPU Memory Utilization", model_info.get("gpu_memory_utilization", "Not specified")),
+        ("Max Model Length", model_info.get("max_model_len", "Not specified")),
+        ("Trust Remote Code", model_info.get("trust_remote_code", "False")),
+        ("Evaluation Device", model_info.get("evaluation_device", "Not specified")),
+        ("Batch Size", model_info.get("batch_size", "Not specified")),
+    ]
+    
+    for param, value in hardware_info:
+        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+    
+    html.append('</tbody>')
+    html.append('</table>')
     html.append('</div>')
     
+    # Advanced Features and Optimization
+    html.append('<h3>⚡ Advanced Features & Optimization</h3>')
+    html.append('<div class="table-container">')
+    html.append('<table>')
+    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
+    html.append('<tbody>')
+    
+    advanced_info = [
+        ("Attention Implementation", model_info.get("attention_implementation", "Not specified")),
+        ("Flash Attention", model_info.get("use_flash_attention", "Not specified")),
+        ("Low CPU Memory Usage", model_info.get("low_cpu_mem_usage", "Not specified")),
+        ("Use Cache", model_info.get("use_cache", "Not specified")),
+        ("Cache Directory", model_info.get("cache_dir", "Not specified")),
+        ("Offload Folder", model_info.get("offload_folder", "Not specified")),
+        ("PEFT Configuration", model_info.get("peft_config", "None")),
+        ("LoRA Configuration", model_info.get("lora_config", "None")),
+    ]
+    
+    for param, value in advanced_info:
+        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+    
+    html.append('</tbody>')
+    html.append('</table>')
+    html.append('</div>')
+    
+    # Generation Parameters
+    html.append('<h3>🎯 Generation Parameters</h3>')
+    html.append('<div class="table-container">')
+    html.append('<table>')
+    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
+    html.append('<tbody>')
+    
+    generation_info = [
+        ("Temperature", model_info.get("temperature", "Not specified")),
+        ("Top P", model_info.get("top_p", "Not specified")),
+        ("Top K", model_info.get("top_k", "Not specified")),
+        ("Max Tokens", model_info.get("max_tokens", "Not specified")),
+        ("Max New Tokens", model_info.get("max_new_tokens", "Not specified")),
+        ("Do Sample", model_info.get("do_sample", "Not specified")),
+        ("Num Beams", model_info.get("num_beams", "Not specified")),
+        ("Repetition Penalty", model_info.get("repetition_penalty", "Not specified")),
+        ("Length Penalty", model_info.get("length_penalty", "Not specified")),
+        ("Early Stopping", model_info.get("early_stopping", "Not specified")),
+    ]
+    
+    for param, value in generation_info:
+        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+    
+    html.append('</tbody>')
+    html.append('</table>')
+    html.append('</div>')
+    
+    # Evaluation Configuration
+    html.append('<h3>📋 Evaluation Configuration</h3>')
+    html.append('<div class="table-container">')
+    html.append('<table>')
+    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
+    html.append('<tbody>')
+    
+    eval_info = [
+        ("Evaluated Tasks", model_info.get("evaluated_tasks", "Not specified")),
+        ("Number of Few-shot Examples", model_info.get("num_fewshot", "Not specified")),
+        ("Samples Per Task", model_info.get("samples_per_task", "All available")),
+        ("Evaluation Framework", "lm-evaluation-harness"),
+    ]
+    
+    for param, value in eval_info:
+        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+    
+    html.append('</tbody>')
+    html.append('</table>')
+    html.append('</div>')
+    
+    # Architecture Details (if available)
+    if model_info.get("name", "Unknown") != "Unknown":
+        arch_info = get_model_architecture_info(model_info["name"])
+        if arch_info.get("family", "Unknown") != "Unknown":
+            html.append('<h3>🏗️ Architecture Details</h3>')
+            html.append('<div class="table-container">')
+            html.append('<table>')
+            html.append('<thead><tr><th>Aspect</th><th>Details</th></tr></thead>')
+            html.append('<tbody>')
+            
+            for key, value in arch_info.items():
+                if key != "family":  # Skip family as it's redundant with architecture
+                    display_key = key.replace("_", " ").title()
+                    html.append(f'<tr><td><strong>{display_key}</strong></td><td>{value}</td></tr>')
+            
+            html.append('</tbody>')
+            html.append('</table>')
+            html.append('</div>')
+    
+    html.append('</div>')
     return '\n'.join(html)
 
 def generate_performance_charts(results_data: Dict[str, Any]) -> Tuple[str, str]:
@@ -899,7 +988,7 @@ def generate_task_results(results_data: Dict[str, Any]) -> str:
     return '\n'.join(html)
 
 def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
-    """Generate sample analysis section with tabs."""
+    """Generate sample analysis section with tabs and proper hellaswag context handling."""
     html = ['<div class="card">']
     html.append('<h2>🔍 Sample Analysis</h2>')
     
@@ -927,6 +1016,9 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
         active_class = 'active' if i == 0 else ''
         html.append(f'<div id="task-{i}" class="tab-content {active_class}">')
         
+        # Check if this is a hellaswag task
+        is_hellaswag = 'hellaswag' in task.lower()
+        
         # Show up to 5 samples per task
         displayed_samples = 0
         max_samples = 5
@@ -948,8 +1040,27 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
             
             if 'doc' in sample and sample['doc'].get('choices'):
                 choices = sample['doc']['choices']
-                labels = choices.get('label', [])
-                texts = choices.get('text', [])
+                labels = []
+                texts = []
+                
+                # Handle different choice formats
+                if isinstance(choices, dict) and 'text' in choices and 'label' in choices:
+                    # Dictionary format: {'text': [...], 'label': [...]}
+                    labels = choices['label']
+                    texts = choices['text']
+                elif isinstance(choices, list):
+                    # List format: ['option1', 'option2', ...]
+                    texts = choices
+                    labels = [chr(65 + i) for i in range(len(choices))]  # A, B, C, D...
+                else:
+                    # For hellaswag, choices might be in 'endings' field
+                    if is_hellaswag and 'endings' in sample['doc']:
+                        texts = sample['doc']['endings']
+                        labels = [chr(65 + i) for i in range(len(texts))]
+                    else:
+                        # Fallback for other formats
+                        labels = []
+                        texts = []
                 
                 # Get correct answer
                 if target_index is not None and target_index < len(labels) and target_index < len(texts):
@@ -982,16 +1093,58 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
             html.append(f'<div class="sample-header">{correctness_icon} Sample {displayed_samples + 1}</div>')
             html.append('<div class="sample-content">')
             
-            # Show the question
-            if 'doc' in sample and 'question' in sample['doc']:
-                html.append(f'<h4>❓ Question:</h4>')
-                html.append(f'<div class="code-block">{sample["doc"]["question"]}</div>')
+            # Show activity label for hellaswag
+            if is_hellaswag and 'doc' in sample and 'activity_label' in sample['doc']:
+                html.append(f'<div class="activity-label">{sample["doc"]["activity_label"]}</div>')
+            
+            # Show the question or context based on task type
+            if is_hellaswag:
+                # For hellaswag, show the context (ctx) field
+                if 'doc' in sample:
+                    doc = sample['doc']
+                    context = ""
+                    
+                    # HellaSwag can have context in different fields
+                    if 'ctx' in doc:
+                        context = doc['ctx']
+                    elif 'ctx_a' in doc:
+                        # Some versions split context into ctx_a and ctx_b
+                        context = doc['ctx_a']
+                        if 'ctx_b' in doc and doc['ctx_b']:
+                            context += " " + doc['ctx_b']
+                    
+                    if context:
+                        html.append(f'<h4>📝 Context:</h4>')
+                        html.append(f'<div class="context-block">{context}</div>')
+            else:
+                # For other tasks, show the question field
+                if 'doc' in sample and 'question' in sample['doc']:
+                    html.append(f'<h4>❓ Question:</h4>')
+                    html.append(f'<div class="code-block">{sample["doc"]["question"]}</div>')
             
             # Show answer choices
-            if 'doc' in sample and sample['doc'].get('choices'):
-                choices = sample['doc']['choices']
-                labels = choices.get('label', [])
-                texts = choices.get('text', [])
+            if 'doc' in sample:
+                doc = sample['doc']
+                choices = None
+                labels = []
+                texts = []
+                
+                # Get choices from appropriate field
+                if 'choices' in doc:
+                    choices = doc['choices']
+                elif is_hellaswag and 'endings' in doc:
+                    choices = doc['endings']
+                
+                if choices:
+                    # Handle different choice formats
+                    if isinstance(choices, dict) and 'text' in choices and 'label' in choices:
+                        # Dictionary format: {'text': [...], 'label': [...]}
+                        labels = choices['label']
+                        texts = choices['text']
+                    elif isinstance(choices, list):
+                        # List format: ['option1', 'option2', ...]
+                        texts = choices
+                        labels = [chr(65 + i) for i in range(len(choices))]  # A, B, C, D...
                 
                 if labels and texts:
                     html.append(f'<h4>📋 Answer Choices:</h4>')

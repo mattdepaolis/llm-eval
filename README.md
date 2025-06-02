@@ -24,10 +24,63 @@ A **professional-grade LLM evaluation framework** with beautiful HTML reports, d
 
 ## 🚀 Quick Start
 
-### Installation
+### Installation Options
+
+#### 🤖 **Automatic Installation (Recommended)**
 
 ```bash
+# Install the package
 pip install llm-testkit
+
+# Auto-install PyTorch with CUDA 12.8 for optimal performance
+python -c "import llm_testkit; llm_testkit.install_pytorch_for_gpu()"
+```
+
+This will:
+- 🔍 Detect your GPU automatically
+- 📋 Show compatibility information  
+- 🚀 Install PyTorch with CUDA 12.8 (optimal for all modern GPUs)
+- ✅ Verify the installation
+
+#### 🎯 **Manual Installation**
+
+```bash
+# Install PyTorch with CUDA 12.8 support (optimal for all NVIDIA GPUs)
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+
+# Install LLM Testkit
+pip install llm-testkit
+```
+
+#### 🖥️ **Quick Installation**
+
+```bash
+# Install LLM Testkit (then manually install PyTorch CUDA 12.8)
+pip install llm-testkit
+```
+
+#### 💻 **CPU-Only Installation**
+
+```bash
+# For CPU-only evaluation (no CUDA) - install PyTorch CPU version manually
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install llm-testkit
+```
+
+**🚀 Why CUDA 12.8?**
+CUDA 12.8 provides the best performance and is backward compatible with all modern NVIDIA GPUs (RTX 20 series and newer). It's required for RTX 5090+ but optimizes performance for all GPUs.
+
+#### 🔍 **Check GPU Compatibility Only**
+
+```python
+import llm_testkit
+
+# Check what GPU you have and get installation recommendations
+gpu_info = llm_testkit.check_gpu_compatibility()
+print(f"GPUs detected: {gpu_info['gpus_detected']}")
+print(f"Recommendation: {gpu_info['recommendation']}")
+print(f"Installation command: {gpu_info['installation_command']}")
+```
 
 ### CLI Usage
 
@@ -90,6 +143,9 @@ The framework generates **publication-quality HTML reports** with:
 # Main evaluation
 llm-eval --model hf --model_name MODEL --tasks TASKS
 
+# GPU detection and PyTorch setup
+llm-eval-gpu-setup
+
 # Generate reports from existing results  
 llm-eval-demo --latest
 
@@ -103,9 +159,13 @@ llm-eval-showcase
 ## 🔧 Requirements
 
 - **Python**: 3.8+
-- **PyTorch**: 2.7.0+ (with CUDA support recommended)
+- **PyTorch**: 2.7.0+ with CUDA 12.8 (recommended for all NVIDIA GPUs)
+  - **Best Performance**: Install with `--index-url https://download.pytorch.org/whl/cu128`
 - **Memory**: 16GB+ RAM for 7B models
 - **GPU**: CUDA-capable GPU recommended for optimal performance
+  - **CUDA 12.8**: Provides best performance for all modern NVIDIA GPUs (RTX 20 series+)
+  - **RTX 5090**: Requires CUDA 12.8 (compute capability sm_120)
+  - **Older GPUs**: Still benefit from CUDA 12.8 optimizations
 
 ## 📈 Use Cases
 
@@ -124,7 +184,7 @@ llm-eval-showcase
 - **Student Projects**: Easy-to-use evaluation framework for coursework
 - **Research Training**: Professional-grade tools for academic research
 
-## 🏗️ Advanced Usage
+## 🔧 Advanced Usage
 
 ### Custom Evaluation Pipeline
 
@@ -144,6 +204,192 @@ results, output_path = evaluate_model(
 )
 ```
 
+### 📋 Comprehensive Configuration Example
+
+The enhanced LLM Testkit automatically captures **60+ configuration parameters** for detailed reporting. Here's a complete example showcasing all configuration attributes:
+
+```python
+import llm_testkit
+
+# 🎯 Complete evaluation with all configuration options
+results, report_path = llm_testkit.quick_html_report(
+    # Basic Model Configuration
+    model_name="mistralai/Mistral-7B-v0.1",
+    model_type="vllm",  # or "hf" for HuggingFace
+    
+    # Evaluation Settings
+    tasks="hellaswag,arc_easy,mmlu,gsm8k",
+    limit=500,  # samples per task
+    
+    # Performance & Hardware Configuration
+    tensor_parallel_size=2,           # Multi-GPU setup
+    gpu_memory_utilization=0.8,       # GPU memory usage
+    batch_size=16,                    # Batch processing
+    device="cuda",                    # Device selection
+    
+    # Generation Parameters
+    temperature=0.7,                  # Sampling temperature
+    top_p=0.9,                       # Nucleus sampling
+    top_k=50,                        # Top-k sampling
+    max_new_tokens=512,              # Max output length
+    do_sample=True,                  # Enable sampling
+    repetition_penalty=1.1,          # Prevent repetition
+    
+    # Advanced Model Configuration
+    dtype="auto",                    # Data type optimization
+    trust_remote_code=True,          # Enable custom code
+    use_flash_attention_2=True,      # Flash attention optimization
+    
+    # Quantization (for HuggingFace models)
+    quantize=True,                   # Enable quantization
+    quantization_method="4bit",      # 4-bit quantization
+    
+    # vLLM Specific Settings
+    max_model_len=4096,             # Context length
+    swap_space=4,                   # Swap space (GB)
+    enable_prefix_caching=True,     # Prefix caching
+    
+    # Evaluation Configuration
+    num_fewshot=0,                  # Few-shot examples
+    preserve_default_fewshot=False, # Use task defaults
+    
+    # Output Settings
+    output_dir="comprehensive_reports",
+    generate_report=True,
+    report_format="professional"
+)
+
+print(f"📊 Comprehensive evaluation completed!")
+print(f"📄 Professional report: {report_path}")
+```
+
+### 📈 What Gets Captured Automatically
+
+The enhanced framework automatically extracts and displays **all configuration details** in beautiful HTML reports:
+
+#### 🔧 **Basic Model Information**
+```python
+# Automatically detected and displayed:
+{
+    "name": "mistralai/Mistral-7B-v0.1",
+    "architecture": "Mistral (Transformer)", 
+    "parameters": "~7 billion",
+    "context_length": "32,768 tokens",
+    "backend": "VLLM",
+    "quantization": "4-bit",
+    "data_type": "auto"
+}
+```
+
+#### 🖥️ **Hardware & Performance Configuration**
+```python
+# Multi-GPU and performance settings:
+{
+    "device_mapping": "Multi-GPU (TP=2)",
+    "tensor_parallel_size": 2,
+    "gpu_memory_utilization": "0.80",
+    "max_model_len": "4096",
+    "batch_size": "16",
+    "evaluation_device": "cuda"
+}
+```
+
+#### ⚡ **Advanced Features & Optimization**
+```python
+# Advanced model features captured:
+{
+    "attention_implementation": "flash_attention_2",
+    "use_flash_attention": "True",
+    "trust_remote_code": "True",
+    "enable_prefix_caching": "True",
+    "swap_space": "4 GB",
+    "use_cache": "True"
+}
+```
+
+#### 🎯 **Generation Parameters**
+```python
+# All generation settings tracked:
+{
+    "temperature": "0.7",
+    "top_p": "0.9", 
+    "top_k": "50",
+    "max_new_tokens": "512",
+    "do_sample": "True",
+    "repetition_penalty": "1.1",
+    "num_beams": "1"
+}
+```
+
+#### 🏗️ **Architecture Details**
+```python
+# Model family specific information:
+{
+    "family": "Mistral",
+    "attention": "Grouped-query attention (GQA) with sliding window",
+    "activation": "SwiGLU", 
+    "positional_encoding": "RoPE (Rotary Position Embedding)",
+    "vocab_size": "32,000",
+    "special_features": "Sliding window attention (4096 tokens)"
+}
+```
+
+### 🎨 Enhanced HTML Reports
+
+The comprehensive configuration example above generates **professional HTML reports** with:
+
+- **📋 Executive Summary** - Overall performance with badges and insights
+- **⚙️ Model Configuration** - 6 detailed sections with 60+ parameters:
+  - Basic Model Information
+  - Hardware & Performance Configuration  
+  - Advanced Features & Optimization
+  - Generation Parameters
+  - Evaluation Configuration
+  - Architecture Details
+- **📊 Performance Charts** - Interactive radar and bar charts
+- **🔍 Sample Analysis** - Detailed per-task breakdowns with proper HellaSwag context display
+- **📱 Responsive Design** - Perfect on desktop, tablet, and mobile
+
+### 🚀 Production-Ready Example
+
+For production use with maximum performance:
+
+```python
+import llm_testkit
+
+# Production evaluation with optimal settings
+results, report_path = llm_testkit.quick_html_report(
+    model_name="mistralai/Mistral-7B-v0.1",
+    model_type="vllm", 
+    tasks="hellaswag,arc_easy,mmlu,truthfulqa",
+    
+    # High-performance configuration
+    tensor_parallel_size=4,           # 4-GPU setup
+    gpu_memory_utilization=0.95,      # Max GPU usage
+    batch_size=32,                    # Large batches
+    max_model_len=8192,              # Extended context
+    
+    # Optimized generation
+    temperature=0.0,                  # Deterministic
+    max_new_tokens=256,              # Efficient generation
+    enable_prefix_caching=True,       # Speed optimization
+    
+    # Professional reporting
+    limit=1000,                       # Comprehensive evaluation
+    report_format="professional",
+    output_dir="production_reports"
+)
+
+print(f"🎯 Production evaluation complete: {report_path}")
+```
+
+**Key Benefits:**
+- ✅ **Zero Configuration Loss** - All 60+ parameters automatically captured
+- ✅ **Professional Reporting** - Publication-ready HTML with detailed sections  
+- ✅ **Architecture Intelligence** - Automatic model family detection and optimization
+- ✅ **Performance Optimization** - GPU validation and memory management
+- ✅ **Complete Traceability** - Full configuration tracking for reproducibility
+
 ### Batch Processing
 
 ```python
@@ -162,6 +408,45 @@ for model in models:
         output_dir=f"reports/{model.replace('/', '_')}"
     )
 ```
+
+## 🔧 Troubleshooting
+
+### CUDA Compatibility Issues
+
+**Problem**: Getting a warning like:
+```
+NVIDIA GeForce RTX 5090 with CUDA capability sm_120 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_50 sm_60 sm_70 sm_75 sm_80 sm_86 sm_90.
+```
+
+**Solution**: Install PyTorch with CUDA 12.8 support:
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+```
+
+**Why CUDA 12.8 for Everyone?**
+- ✅ **Required for RTX 5090+**: Only CUDA 12.8 supports compute capability sm_120
+- ✅ **Optimal for all GPUs**: Provides best performance even for older GPUs  
+- ✅ **Backward Compatible**: Works with RTX 20 series and newer
+- ✅ **Latest Optimizations**: Most recent performance improvements from NVIDIA
+
+### Memory Issues
+
+**Problem**: Out of memory errors during evaluation.
+
+**Solutions**:
+- Reduce `batch_size` parameter
+- Use quantization: `quantize=True, quantization_method="4bit"`
+- For vLLM: reduce `gpu_memory_utilization` (default 0.9)
+- Use tensor parallelism across multiple GPUs
+
+### Performance Optimization
+
+**For maximum performance**:
+- Use vLLM backend for inference: `model_type="vllm"`
+- Enable tensor parallelism: `tensor_parallel_size=2` (or higher)
+- Use Flash Attention: `use_flash_attention_2=True`
+- Optimize memory: `gpu_memory_utilization=0.95`
 
 ## 🤝 Contributing
 
