@@ -45,17 +45,17 @@ llm-eval --model hf --model_name mistralai/Mistral-7B-v0.1 --tasks mmlu --device
 ### Python API
 
 ```python
-import llm_eval
+import llm_testkit
 
 # Quick evaluation
-results = llm_eval.quick_eval(
+results = llm_testkit.quick_eval(
     model_name="mistralai/Mistral-7B-v0.1",
     tasks="arc_easy",
     limit=100
 )
 
 # Evaluation with automatic HTML report
-results, report_path = llm_eval.quick_html_report(
+results, report_path = llm_testkit.quick_html_report(
     model_name="mistralai/Mistral-7B-v0.1",
     tasks="arc_easy,hellaswag",
     limit=100
@@ -129,7 +129,7 @@ llm-eval-showcase
 ### Custom Evaluation Pipeline
 
 ```python
-from llm_eval import evaluate_model
+from llm_testkit import evaluate_model
 
 # Advanced evaluation with custom settings
 results, output_path = evaluate_model(
@@ -147,7 +147,7 @@ results, output_path = evaluate_model(
 ### Batch Processing
 
 ```python
-import llm_eval
+import llm_testkit
 
 models = [
     "mistralai/Mistral-7B-v0.1",
@@ -156,7 +156,7 @@ models = [
 ]
 
 for model in models:
-    results, report = llm_eval.quick_html_report(
+    results, report = llm_testkit.quick_html_report(
         model_name=model,
         tasks="arc_easy,hellaswag",
         output_dir=f"reports/{model.replace('/', '_')}"
