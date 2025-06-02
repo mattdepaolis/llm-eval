@@ -51,7 +51,7 @@ def read_requirements():
     return requirements
 
 setup(
-    name="llm-eval",
+    name="llm-testkit",
     version=get_version(),
     author="Matthias De Paolis",
     author_email="mattdepaolis@users.noreply.github.com",

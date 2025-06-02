@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm-eval"
+name = "llm-testkit"
 dynamic = ["version"]
 description = "Professional LLM Evaluation Framework with Beautiful HTML Reports"
 readme = "README.md"
