@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![LLM Evaluation Framework](assets/llm-eval-hero.svg)
+![LLM Evaluation Framework](img/thumbnail.jpg)
 
 </div>
 
