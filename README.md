@@ -7,7 +7,7 @@
 </div>
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PyPI version](https://badge.fury.io/py/llm-eval.svg)](https://pypi.org/project/llm-eval/)
+[![PyPI version](https://badge.fury.io/py/llm-testkit.svg)](https://pypi.org/project/llm-testkit/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Torch 2.7+](https://img.shields.io/badge/PyTorch-2.7+-red.svg)](https://pytorch.org/)
 
@@ -27,8 +27,7 @@ A **professional-grade LLM evaluation framework** with beautiful HTML reports, d
 ### Installation
 
 ```bash
-pip install llm-eval
-```
+pip install llm-testkit
 
 ### CLI Usage
 
