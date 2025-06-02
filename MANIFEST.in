@@ -1,0 +1,40 @@
+# Include essential package documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include requirements.txt
+
+# Include examples
+recursive-include examples *.py *.md
+
+# Include package configuration
+include pyproject.toml
+include setup.py
+include MANIFEST.in
+
+# Include package data
+recursive-include llm_eval *.py
+recursive-include llm_eval *.yaml
+recursive-include llm_eval *.yml  
+recursive-include llm_eval *.json
+recursive-include llm_eval *.html
+recursive-include llm_eval *.css
+recursive-include llm_eval *.js
+
+# Exclude development and build artifacts
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *~
+global-exclude .DS_Store
+global-exclude __pycache__
+prune .git*
+prune build/*
+prune dist/*
+prune .pytest_cache/*
+prune .mypy_cache/*
+prune .venv/*
+prune venv/*
+
+# Exclude directories that are generated or not part of package
+prune reports
+prune results 
