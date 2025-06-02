@@ -13,7 +13,7 @@ Features:
 - Easy-to-use Python API and CLI
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __author__ = "Matthias De Paolis"
 __email__ = "mattdepaolis@users.noreply.github.com"
 __license__ = "MIT"
