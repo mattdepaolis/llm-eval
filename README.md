@@ -1,13 +1,17 @@
 # 🚀 LLM-Eval: Professional LLM Evaluation Framework
 
+<div align="center">
+
+![LLM Evaluation Framework](assets/llm-eval-hero.svg)
+
+</div>
+
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI version](https://badge.fury.io/py/llm-eval.svg)](https://pypi.org/project/llm-eval/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Torch 2.7+](https://img.shields.io/badge/PyTorch-2.7+-red.svg)](https://pytorch.org/)
 
 A **professional-grade LLM evaluation framework** with beautiful HTML reports, designed for researchers, developers, and businesses who need **publication-quality evaluation results**.
-
-![LLM Evaluation Demo](https://via.placeholder.com/800x400/1e1e1e/ffffff?text=LLM+Evaluation+Framework)
 
 ## ✨ Features
 
