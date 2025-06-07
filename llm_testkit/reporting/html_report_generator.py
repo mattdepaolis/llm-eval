@@ -483,6 +483,301 @@ def get_html_template() -> str:
             display: inline-block;
             margin-bottom: 0.5rem;
         }}
+
+        /* ZENO-Style Professional Sample Analysis */
+        .zeno-sample-card {{
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }}
+
+        .zeno-sample-card:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }}
+
+        .zeno-sample-card.correct {{
+            border-left: 5px solid var(--success-color);
+        }}
+
+        .zeno-sample-card.incorrect {{
+            border-left: 5px solid var(--danger-color);
+        }}
+
+        .zeno-sample-header {{
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+
+        .sample-status {{
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }}
+
+        .sample-task {{
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }}
+
+        .zeno-sample-content {{
+            padding: 1.5rem;
+        }}
+
+        .question-section {{
+            margin-bottom: 1.5rem;
+        }}
+
+        .section-label {{
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }}
+
+        .question-text {{
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }}
+
+        .activity-badge {{
+            background: linear-gradient(135deg, var(--accent-color), #f59e0b);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+        }}
+
+        .choices-section {{
+            margin: 1.5rem 0;
+        }}
+
+        .zeno-choice-grid {{
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }}
+
+        .zeno-choice-option {{
+            background: var(--card-background);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .zeno-choice-option:hover {{
+            border-color: var(--primary-color);
+            transform: translateX(4px);
+        }}
+
+        .zeno-choice-option.choice-correct {{
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: var(--success-color);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+        }}
+
+        .zeno-choice-option.choice-selected {{
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
+        }}
+
+        .zeno-choice-option.choice-correct.choice-selected {{
+            background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+            border-color: var(--success-color);
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.3);
+        }}
+
+        .choice-label {{
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }}
+
+        .choice-text {{
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }}
+
+        .choice-indicators {{
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }}
+
+        .results-section {{
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border-color);
+        }}
+
+        .result-item {{
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }}
+
+        .result-item.correct-result {{
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }}
+
+        .result-item.incorrect-result {{
+            border-color: var(--danger-color);
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        }}
+
+        .result-item.raw-result {{
+            border-color: var(--text-secondary);
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }}
+
+        .result-header {{
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }}
+
+        .result-icon {{
+            font-size: 1.2rem;
+        }}
+
+        .result-label {{
+            font-weight: 600;
+            color: var(--text-primary);
+        }}
+
+        .result-content {{
+            padding: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }}
+
+        .raw-content {{
+            font-family: 'Monaco', 'Consolas', monospace;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }}
+
+        .confidence-scores {{
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }}
+
+        .confidence-scores h5 {{
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }}
+
+        .confidence-item {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            background: var(--card-background);
+            border: 1px solid transparent;
+        }}
+
+        .confidence-item.selected-confidence {{
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-color: var(--primary-color);
+            font-weight: 600;
+        }}
+
+        .conf-label {{
+            font-weight: 500;
+            color: var(--text-primary);
+        }}
+
+        .conf-score {{
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }}
+
+        .more-samples-note {{
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }}
+
+        /* Legacy support for old styles */
+        .sample-card {{
+            /* Keep for backward compatibility */
+        }}
+
+        .sample-header {{
+            /* Keep for backward compatibility */
+        }}
+
+        .sample-content {{
+            /* Keep for backward compatibility */
+        }}
     </style>
 </head>
 <body>
@@ -1035,6 +1330,14 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
             
             # Get the correct answer information
             target_index = sample.get('target')
+            
+            # Convert target_index to integer if it's a string
+            if target_index is not None:
+                try:
+                    target_index = int(target_index)
+                except (ValueError, TypeError):
+                    target_index = None
+            
             correct_choice_label = None
             correct_choice_text = None
             
@@ -1089,15 +1392,23 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
             correctness_class = 'correct' if is_correct else 'incorrect'
             correctness_icon = '✅' if is_correct else '❌'
             
-            html.append(f'<div class="sample-card {correctness_class}">')
-            html.append(f'<div class="sample-header">{correctness_icon} Sample {displayed_samples + 1}</div>')
-            html.append('<div class="sample-content">')
+            # ZENO-style professional sample card
+            html.append(f'<div class="zeno-sample-card {correctness_class}">')
+            html.append(f'<div class="zeno-sample-header">')
+            html.append(f'<span class="sample-status">{correctness_icon} Sample {displayed_samples + 1}</span>')
+            html.append(f'<span class="sample-task">{task.upper()}</span>')
+            html.append('</div>')
             
-            # Show activity label for hellaswag
+            html.append('<div class="zeno-sample-content">')
+            
+            # Question/Context Section (ZENO-style)
+            html.append('<div class="question-section">')
+            
+            # Show activity label for hellaswag in a professional way
             if is_hellaswag and 'doc' in sample and 'activity_label' in sample['doc']:
-                html.append(f'<div class="activity-label">{sample["doc"]["activity_label"]}</div>')
+                html.append(f'<div class="activity-badge">{sample["doc"]["activity_label"]}</div>')
             
-            # Show the question or context based on task type
+            # Display question or context with clear labeling
             if is_hellaswag:
                 # For hellaswag, show the context (ctx) field
                 if 'doc' in sample:
@@ -1114,15 +1425,17 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
                             context += " " + doc['ctx_b']
                     
                     if context:
-                        html.append(f'<h4>📝 Context:</h4>')
-                        html.append(f'<div class="context-block">{context}</div>')
+                        html.append(f'<h4 class="section-label">📖 Context</h4>')
+                        html.append(f'<div class="question-text">{context}</div>')
             else:
                 # For other tasks, show the question field
                 if 'doc' in sample and 'question' in sample['doc']:
-                    html.append(f'<h4>❓ Question:</h4>')
-                    html.append(f'<div class="code-block">{sample["doc"]["question"]}</div>')
+                    html.append(f'<h4 class="section-label">❓ Question</h4>')
+                    html.append(f'<div class="question-text">{sample["doc"]["question"]}</div>')
             
-            # Show answer choices
+            html.append('</div>')  # End question-section
+            
+            # Choices Section (ZENO-style professional layout)
             if 'doc' in sample:
                 doc = sample['doc']
                 choices = None
@@ -1147,61 +1460,100 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
                         labels = [chr(65 + i) for i in range(len(choices))]  # A, B, C, D...
                 
                 if labels and texts:
-                    html.append(f'<h4>📋 Answer Choices:</h4>')
-                    html.append('<div class="choice-list">')
+                    html.append('<div class="choices-section">')
+                    html.append(f'<h4 class="section-label">📋 Answer Choices</h4>')
+                    html.append('<div class="zeno-choice-grid">')
                     
                     for idx, (label, text) in enumerate(zip(labels, texts)):
-                        choice_class = ""
-                        choice_icon = ""
+                        choice_classes = ["zeno-choice-option"]
+                        choice_indicators = []
                         
                         # Highlight correct answer
                         if idx == target_index:
-                            choice_class = " choice-correct"
-                            choice_icon = " ✅"
+                            choice_classes.append("choice-correct")
+                            choice_indicators.append("✓ Correct")
                         
                         # Highlight model's choice  
                         if idx == model_choice_index:
-                            if idx == target_index:
-                                choice_class = " choice-correct-selected"
-                                choice_icon = " ✅🎯"  # Correct and selected
-                            else:
-                                choice_class = " choice-incorrect-selected"
-                                choice_icon = " ❌🤖"  # Incorrect but selected
+                            choice_classes.append("choice-selected")
+                            choice_indicators.append("🤖 Selected")
                         
-                        html.append(f'<div class="choice-item{choice_class}">')
-                        html.append(f'<strong>{label}.</strong> {text}{choice_icon}')
+                        indicator_text = " • ".join(choice_indicators) if choice_indicators else ""
+                        
+                        html.append(f'<div class="{" ".join(choice_classes)}">')
+                        html.append(f'<div class="choice-label">{label}</div>')
+                        html.append(f'<div class="choice-text">{text}</div>')
+                        if indicator_text:
+                            html.append(f'<div class="choice-indicators">{indicator_text}</div>')
                         html.append('</div>')
                     
-                    html.append('</div>')
+                    html.append('</div>')  # End zeno-choice-grid
+                    html.append('</div>')  # End choices-section
             
-            # Show correct answer clearly
+            # Results Section (ZENO-style)
+            html.append('<div class="results-section">')
+            
+            # Correct answer display
             if correct_choice_label and correct_choice_text:
-                html.append(f'<h4>✅ Correct Answer:</h4>')
-                html.append(f'<div class="answer-highlight correct-answer">')
-                html.append(f'<strong>{correct_choice_label}</strong> - {correct_choice_text}')
+                html.append('<div class="result-item correct-result">')
+                html.append('<div class="result-header">')
+                html.append('<span class="result-icon">✅</span>')
+                html.append('<span class="result-label">Correct Answer</span>')
+                html.append('</div>')
+                html.append(f'<div class="result-content"><strong>{correct_choice_label}:</strong> {correct_choice_text}</div>')
                 html.append('</div>')
             
-            # Show model's choice clearly
+            # Model's response display
             if model_choice_label and model_choice_text:
-                response_class = "correct-response" if is_correct else "incorrect-response"
-                response_icon = "✅" if is_correct else "❌"
-                html.append(f'<h4>🤖 Model Response ({response_icon} {"Correct" if is_correct else "Incorrect"}):</h4>')
-                html.append(f'<div class="answer-highlight {response_class}">')
-                html.append(f'<strong>{model_choice_label}</strong> - {model_choice_text}')
+                response_class = "correct-result" if is_correct else "incorrect-result"
+                result_icon = "✅" if is_correct else "❌"
+                result_status = "Correct" if is_correct else "Incorrect"
+                
+                html.append(f'<div class="result-item {response_class}">')
+                html.append('<div class="result-header">')
+                html.append(f'<span class="result-icon">{result_icon}</span>')
+                html.append(f'<span class="result-label">Model Response ({result_status})</span>')
+                html.append('</div>')
+                html.append(f'<div class="result-content"><strong>{model_choice_label}:</strong> {model_choice_text}</div>')
+                
+                # Show confidence scores if available
+                if 'filtered_resps' in sample and sample['filtered_resps']:
+                    html.append('<div class="confidence-scores">')
+                    html.append('<h5>Confidence Scores:</h5>')
+                    for idx, resp in enumerate(sample['filtered_resps'][:len(labels)]):
+                        if isinstance(resp, list) and len(resp) >= 1:
+                            prob = resp[0]
+                            label = labels[idx] if idx < len(labels) else f"Option {idx+1}"
+                            confidence = f"{prob:.4f}"
+                            highlight = "selected-confidence" if idx == model_choice_index else ""
+                            html.append(f'<div class="confidence-item {highlight}">')
+                            html.append(f'<span class="conf-label">{label}:</span>')
+                            html.append(f'<span class="conf-score">{confidence}</span>')
+                            html.append('</div>')
+                    html.append('</div>')
+                
                 html.append('</div>')
             else:
                 # Fallback to show raw response if parsing fails
                 if 'filtered_resps' in sample and sample['filtered_resps']:
-                    html.append(f'<h4>🤖 Model Response (Raw):</h4>')
-                    html.append(f'<div class="code-block">{sample["filtered_resps"][:100]}{"..." if len(str(sample["filtered_resps"])) > 100 else ""}</div>')
+                    html.append('<div class="result-item raw-result">')
+                    html.append('<div class="result-header">')
+                    html.append('<span class="result-icon">🤖</span>')
+                    html.append('<span class="result-label">Model Response (Raw)</span>')
+                    html.append('</div>')
+                    raw_response = str(sample["filtered_resps"])
+                    truncated_response = raw_response[:200] + "..." if len(raw_response) > 200 else raw_response
+                    html.append(f'<div class="result-content raw-content">{truncated_response}</div>')
+                    html.append('</div>')
             
-            html.append('</div>')
-            html.append('</div>')
+            html.append('</div>')  # End results-section
+            html.append('</div>')  # End zeno-sample-content
+            html.append('</div>')  # End zeno-sample-card
             
             displayed_samples += 1
         
         if len(task_samples) > max_samples:
-            html.append(f'<p><em>... and {len(task_samples) - max_samples} more samples</em></p>')
+            html.append(f'<p class="more-samples-note"><em>... and {len(task_samples) - max_samples} more samples</em></p>')
         
         html.append('</div>')
     

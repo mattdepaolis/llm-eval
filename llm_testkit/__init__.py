@@ -13,11 +13,11 @@ Features:
 - Easy-to-use Python API and CLI
 """
 
-__version__ = "1.0.9"
+__version__ = "1.1.1"
 __author__ = "Matthias De Paolis"
 __email__ = "mattdepaolis@users.noreply.github.com"
 __license__ = "MIT"
-__url__ = "https://github.com/mattdepaolis/llm-eval"
+__url__ = "https://github.com/mattdepaolis/llm-testkit"
 
 # GPU detection and PyTorch installation helper
 def check_gpu_compatibility():
@@ -263,7 +263,7 @@ def quick_html_report(model_name: str, tasks: str = "arc_easy", model_type: str 
 def get_package_info():
     """Get comprehensive package information."""
     return {
-        "name": "llm-eval",
+        "name": "llm-testkit",
         "version": __version__,
         "author": __author__,
         "email": __email__,

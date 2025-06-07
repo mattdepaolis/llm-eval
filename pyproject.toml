@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-testkit"
-version = "1.0.9"
-description = "Professional-grade LLM evaluation framework with beautiful HTML reports"
+version = "1.1.1"
+description = "Professional-grade LLM evaluation framework with ZENO-style HTML reports and enhanced sample analysis"
 authors = [{name = "Matthias De Paolis", email = "mattdepaolis@users.noreply.github.com"}]
 license = {text = "MIT"}
 readme = "README.md"
@@ -62,10 +62,10 @@ cuda = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/mattdepaolis/llm-eval"
-"Bug Tracker" = "https://github.com/mattdepaolis/llm-eval/issues"
-"Documentation" = "https://github.com/mattdepaolis/llm-eval#readme"
-"Source Code" = "https://github.com/mattdepaolis/llm-eval"
+"Homepage" = "https://github.com/mattdepaolis/llm-testkit"
+"Bug Tracker" = "https://github.com/mattdepaolis/llm-testkit/issues"
+"Documentation" = "https://github.com/mattdepaolis/llm-testkit#readme"
+"Source Code" = "https://github.com/mattdepaolis/llm-testkit"
 
 [project.scripts]
 llm-eval = "llm_testkit.cli:main"

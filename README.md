@@ -1,4 +1,4 @@
-# 🚀 LLM-Eval: Professional LLM Evaluation Framework
+# 🚀 LLM-TestKit: Professional LLM Evaluation Framework
 
 <div align="center">
 
@@ -15,12 +15,14 @@ A **professional-grade LLM evaluation framework** with beautiful HTML reports, d
 
 ## ✨ Features
 
-🎨 **Beautiful HTML Reports** - Interactive, responsive reports with Chart.js visualizations  
-📊 **Comprehensive Metrics** - Support for 50+ evaluation tasks and custom metrics  
+🎨 **ZENO-Style Professional Reports** - Beautiful card-based layout with enhanced sample analysis  
+📊 **Professional Choice Display** - Clear A/B/C/D choice presentation with visual indicators  
 ⚡ **High Performance** - Optimized for GPU evaluation with batch processing  
 🔧 **Easy Integration** - Simple Python API and CLI for seamless workflows  
-📱 **Mobile-Friendly** - Responsive design for viewing reports on any device  
-💼 **Business-Ready** - Professional presentation quality for client deliverables  
+📱 **Mobile-Friendly** - Enhanced responsive design for viewing reports on any device  
+💼 **Business-Ready** - Commercial-grade presentation quality for client deliverables  
+✅ **Enhanced Sample Analysis** - Comprehensive question, choice, and confidence visualization  
+🎯 **Smart Highlighting** - Color-coded correct answers and model selections
 
 ## 🚀 Quick Start
 
@@ -129,12 +131,17 @@ print(f"📄 Report: {report_path}")
 
 ## 🎨 Sample Reports
 
-The framework generates **publication-quality HTML reports** with:
+The framework generates **ZENO-style professional HTML reports** with:
 
+- 🎨 **Professional Card Layout** - ZENO-inspired sample presentation with hover effects
+- 📋 **Enhanced Question Display** - Clear section headers for questions and contexts  
+- 🔤 **Professional Choice Grid** - Prominent A/B/C/D labels with visual styling
+- ✅ **Smart Answer Highlighting** - Green backgrounds for correct, blue for selected answers
+- 📊 **Confidence Visualization** - Detailed probability scores for all choices
+- 🏷️ **Activity Badges** - Professional labels for HellaSwag activity categories
 - 📈 **Interactive Charts** - Performance visualizations with Chart.js
 - 🏆 **Performance Badges** - Excellent/Good/Needs Improvement indicators  
 - 📋 **Executive Summaries** - Business-ready insights and recommendations
-- 🔍 **Detailed Analysis** - Sample-by-sample breakdown with A/B/C/D choice display
 - 📱 **Responsive Design** - Perfect viewing on desktop, tablet, and mobile
 
 ## 💻 CLI Commands

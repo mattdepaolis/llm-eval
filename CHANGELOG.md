@@ -5,6 +5,165 @@ All notable changes to the Professional LLM Evaluation Framework will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-01-02
+
+### 🔧 Critical Bug Fix
+
+This release fixes a critical type conversion issue in the HTML report generation that was causing `TypeError` when processing evaluation results.
+
+### 🐛 Fixed
+
+#### Type Conversion Error in Sample Analysis
+- **Issue**: `TypeError: '<' not supported between instances of 'str' and 'int'` in HTML report generation
+- **Root Cause**: `target_index` from evaluation results was returned as string but used for integer comparisons
+- **Solution**: Added robust type conversion with error handling:
+  ```python
+  # Convert target_index to integer if it's a string
+  if target_index is not None:
+      try:
+          target_index = int(target_index)
+      except (ValueError, TypeError):
+          target_index = None
+  ```
+
+#### Enhanced Error Handling
+- **✅ Graceful fallback**: Reports continue to generate even with malformed target indices
+- **✅ Type safety**: All integer comparisons now properly validated
+- **✅ Backward compatibility**: Works with both string and integer target formats
+
+### 📦 Package Update
+
+- **Version**: 1.1.0 → 1.1.1
+- **Type**: Patch release (bug fix)
+- **Breaking Changes**: None - fully backward compatible
+
+### 🚀 Impact
+
+#### Before v1.1.1
+- ❌ HTML report generation failed with `TypeError` on certain evaluation results
+- ❌ Sample analysis section could not display due to type mismatch
+- ❌ Users experienced crashes when generating reports
+
+#### After v1.1.1
+- ✅ HTML reports generate successfully for all evaluation formats
+- ✅ Sample analysis displays correctly with proper type handling
+- ✅ Robust error handling prevents crashes
+- ✅ Compatible with both string and integer target indices
+
+---
+
+## [1.1.0] - 2025-01-02
+
+### 🎨 Major Enhancement: ZENO-Style Professional Reports
+
+This release introduces a completely redesigned HTML reporting system inspired by the professional ZENO interface, providing significantly enhanced sample analysis and visual presentation.
+
+### ✨ Added
+
+#### ZENO-Style Sample Analysis
+- **🎨 Professional card layout**: Modern card-based sample presentation with hover effects
+- **📋 Enhanced question display**: Clear section headers with icons for questions and contexts
+- **🔤 Professional choice grid**: Prominent A, B, C, D labels with visual styling
+- **✅ Smart highlighting**: Green backgrounds for correct answers, blue for model selections
+- **🎯 Combined indicators**: Special styling when model selects correct answer
+- **📊 Confidence visualization**: Detailed probability scores for all answer choices
+- **🏷️ Activity badges**: Professional badges for HellaSwag activity labels
+- **📱 Responsive design**: Enhanced mobile and tablet compatibility
+
+#### Enhanced Results Presentation
+- **✅ Dedicated correct answer section**: Clear display of the right answer
+- **🤖 Model response analysis**: Comprehensive model choice breakdown with status
+- **📈 Visual status indicators**: Color-coded correct/incorrect feedback
+- **💡 Clear choice indicators**: "✓ Correct" and "🤖 Selected" labels
+- **📊 Confidence score tables**: Detailed probability display with highlighting
+- **🎨 Professional color scheme**: Consistent visual hierarchy throughout
+
+#### Technical Improvements
+- **🔧 Fixed CLI command**: Added missing `html_convert()` function for `llm-eval-html`
+- **🎯 Smart choice detection**: Handles multiple choice formats automatically
+- **📱 Responsive CSS**: Modern design that works on all device sizes
+- **✨ Smooth animations**: Professional hover effects and transitions
+- **🎨 Visual hierarchy**: Clear information organization and presentation
+
+### 🔧 Fixed
+
+#### CLI Commands
+- **✅ llm-eval-html**: Fixed missing `html_convert` function alias
+- **🔄 Backward compatibility**: Maintained all existing CLI functionality
+- **📦 Package imports**: Improved module loading and error handling
+
+#### Sample Display Issues
+- **✅ Question formatting**: All questions and contexts now display properly
+- **📋 Choice presentation**: Professional choice layout with clear indicators
+- **🎯 Answer highlighting**: Correct answers are clearly marked and visible
+- **📊 Model responses**: Comprehensive display of model selections and confidence
+
+### 📊 Enhanced Features
+
+#### Professional Layout Components
+- **`.zeno-sample-card`**: Main sample container with professional styling
+- **`.zeno-sample-header`**: Clean header with sample status and task labels
+- **`.question-section`**: Structured question/context display
+- **`.choices-section`**: Professional choice grid layout
+- **`.results-section`**: Comprehensive results with confidence scores
+- **`.activity-badge`**: Special styling for HellaSwag activity labels
+
+#### Visual Enhancements
+- **🎨 Modern CSS variables**: Consistent color scheme throughout
+- **📱 Mobile optimization**: Responsive design for all screen sizes
+- **✨ Interactive elements**: Hover effects and smooth transitions
+- **🎯 Visual feedback**: Clear indicators for user interactions
+- **💎 Professional polish**: Business-ready presentation quality
+
+### 🚀 Performance Improvements
+
+- **📈 Faster rendering**: Optimized CSS and HTML structure
+- **💾 Efficient styling**: Reduced redundancy in CSS classes
+- **📱 Better mobile performance**: Optimized for mobile devices
+- **🔄 Improved caching**: Better browser caching for static assets
+
+### 🎯 Use Case Enhancements
+
+#### Research & Academia
+- **📊 Professional sample analysis**: Perfect for research papers and presentations
+- **🔍 Detailed model behavior**: Clear visualization of model choices and reasoning
+- **📋 Publication-ready**: High-quality visual presentation suitable for academic use
+
+#### Commercial Applications
+- **💼 Client presentations**: Professional quality suitable for stakeholder meetings
+- **📈 Executive reports**: Business-ready sample analysis and insights
+- **🎯 Demonstration ready**: Impressive visual quality for product demos
+
+#### Educational Use
+- **📚 Learning analytics**: Clear visualization of model learning and reasoning
+- **🎓 Teaching materials**: Professional materials for AI/ML education
+- **🔍 Model understanding**: Enhanced tools for understanding AI behavior
+
+### 🌟 What's Different
+
+#### Before v1.1.0
+- ❌ Basic text-based sample display
+- ❌ Minimal choice formatting
+- ❌ Limited visual indicators
+- ❌ Poor mobile experience
+
+#### After v1.1.0
+- ✅ Professional ZENO-style card layout
+- ✅ Enhanced question and context display
+- ✅ Professional choice grid with highlighting
+- ✅ Comprehensive model analysis with confidence scores
+- ✅ Beautiful responsive design
+- ✅ Business-ready presentation quality
+
+### 📦 Compatibility
+
+- **🔄 Fully backward compatible**: All existing functionality preserved
+- **📱 Enhanced mobile support**: Improved responsive design
+- **🌐 Browser compatibility**: Works with all modern browsers
+- **⚡ Performance optimized**: Faster loading and rendering
+
+---
+
 ## [1.0.0] - 2025-01-02
 
 ### 🎉 Initial Release

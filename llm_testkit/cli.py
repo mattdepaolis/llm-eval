@@ -346,4 +346,17 @@ def showcase_main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main() 
+    main()
+
+# Create aliases for CLI entry points
+def html_convert():
+    """Alias for html_main for backward compatibility."""
+    return html_main()
+
+def demo():
+    """Alias for demo_main for backward compatibility."""
+    return demo_main()
+
+def showcase():
+    """Alias for showcase_main for backward compatibility."""
+    return showcase_main() 
