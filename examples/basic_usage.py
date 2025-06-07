@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Basic Usage Example for llm-eval Package
+Basic Usage Example for llm-testkit Package
 
-This example demonstrates how to use the llm-eval package for evaluating language models.
+This example demonstrates how to use the llm-testkit package for evaluating language models.
 """
 
 def main():
-    print("🚀 LLM-Eval Basic Usage Example")
+    print("🚀 LLM-TestKit Basic Usage Example")
     print("=" * 50)
     
     # Example 1: Package information

@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains examples demonstrating how to use the `llm-eval` package.
+This directory contains examples demonstrating how to use the `llm-testkit` package.
 
 ## Files
 
