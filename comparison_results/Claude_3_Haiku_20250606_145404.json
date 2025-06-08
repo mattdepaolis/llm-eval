@@ -1,0 +1,30 @@
+{
+  "model_name": "Claude-3-Haiku",
+  "timestamp": "2025-06-06T14:54:04.341479",
+  "results": {
+    "leaderboard_mmlu_pro": {
+      "acc_norm": 0.72
+    },
+    "leaderboard_gpqa_diamond": {
+      "acc_norm": 0.52
+    },
+    "leaderboard_math_algebra_hard": {
+      "exact_match": 0.42
+    },
+    "leaderboard_bbh_boolean_expressions": {
+      "acc_norm": 0.82
+    },
+    "leaderboard_musr_murder_mysteries": {
+      "acc_norm": 0.68
+    }
+  },
+  "config": {
+    "model": "claude-3-haiku"
+  },
+  "model_info": {
+    "name": "Claude-3-Haiku",
+    "type": "LLM",
+    "architecture": "Transformer",
+    "size": "Unknown"
+  }
+}

@@ -50,7 +50,8 @@ def evaluate_model(
     vllm_quantization: Optional[str] = None,
     additional_model_args: Optional[str] = None,
     preserve_default_fewshot: bool = False,
-    report_format: str = "professional"
+    report_format: str = "professional",
+    output_dir: Optional[str] = None
 ) -> Tuple[Dict[str, Any], Optional[str]]:
     """
     Evaluate a language model on specified tasks.
@@ -74,9 +75,12 @@ def evaluate_model(
         vllm_quantization: Quantization method for vLLM
         additional_model_args: Additional arguments for the model
         preserve_default_fewshot: Whether to preserve default few-shot settings for tasks
+        print("🔍 DEBUG: Enhanced evaluate_model called with output_dir:", output_dir)
         report_format: Report format to use ('professional' or 'standard')
+        output_dir: Directory to save outputs (defaults to results directory)
         
     Returns:
+    print("🚨 ENHANCED EVALUATE_MODEL CALLED! 🚨")
         Tuple of (evaluation results, output path)
     """
     print(f"Evaluating model type: {model_type}")
@@ -153,30 +157,48 @@ def evaluate_model(
         normalized_results = normalize_scores(clean_results)
         clean_results['normalized_scores'] = normalized_results
         
-        # Save results
-        if output_path:
-            # Ensure the path is in the results directory
-            if not os.path.isabs(output_path):
-                results_dir = get_results_dir()
-                output_path = os.path.join(results_dir, output_path)
+        # Determine output directory and JSON file path
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+            final_output_dir = output_dir
+        else:
+            final_output_dir = get_results_dir()
+        
+        # Generate JSON filename if not provided
+        json_output_path = output_path
+        if not json_output_path:
+            # Create a filename based on model name and timestamp
+            from datetime import datetime
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            model_safe_name = model_name.replace('/', '_').replace('\\', '_')
+            tasks_str = '_'.join(tasks[:3])  # Use first 3 tasks to avoid overly long filenames
+            if len(tasks) > 3:
+                tasks_str += f"_and_{len(tasks)-3}_more"
+            json_filename = f"results_{model_safe_name}_{tasks_str}_{timestamp}.json"
+            json_output_path = os.path.join(final_output_dir, json_filename)
+        elif not os.path.isabs(json_output_path):
+            # Make relative paths relative to the output directory
+            json_output_path = os.path.join(final_output_dir, json_output_path)
+        
+        # Always save JSON results
+        save_json(clean_results, json_output_path)
+        print(f"📄 JSON results saved to: {json_output_path}")
+        
+        # Generate HTML/markdown report if requested
+        print(f"🔍 DEBUG: generate_report={generate_report}, json_output_path={json_output_path}")
+        report_path = None
+        if generate_report:
+            use_professional = (report_format == "professional")
+            report_path = create_report(clean_results, json_output_path, generate_markdown=True, use_professional_format=use_professional)
             
-            save_json(clean_results, output_path)
-            
-            # Generate markdown report if requested
-            report_path = None
-            if generate_report:
-                use_professional = (report_format == "professional")
-                report_path = create_report(clean_results, output_path, generate_markdown=True, use_professional_format=use_professional)
-            
-            # Clear GPU memory before returning
-            clear_gpu_memory()
-            
-            # Return the output path along with results
-            return results, output_path
+            if report_path:
+                print(f"📊 HTML report generated: {report_path}")
         
         # Clear GPU memory before returning
         clear_gpu_memory()
-        return results, None
+        
+        # Return both the results and the JSON output path
+        return results, json_output_path
     except Exception as e:
         print(f"Error during evaluation: {e}")
         # Clear GPU memory on error as well

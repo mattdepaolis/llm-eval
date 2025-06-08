@@ -16,6 +16,18 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 # Import enhanced model configuration utilities
 from ..models.model_config import get_comprehensive_model_info, get_model_architecture_info
 
+# Import comparison functionality
+try:
+    from ..comparison.model_comparison import (
+        save_model_results, get_available_comparison_models, 
+        generate_comparison_dropdown_html, generate_comparison_javascript,
+        generate_comparison_chart_data, extract_model_info_for_comparison
+    )
+    COMPARISON_AVAILABLE = True
+except ImportError:
+    COMPARISON_AVAILABLE = False
+    print("⚠️ Comparison functionality not available. Model comparison features will be disabled.")
+
 # Define CET timezone
 try:
     CET = ZoneInfo("Europe/Berlin")
@@ -152,6 +164,80 @@ def get_html_template() -> str:
 
         .grid-3 {{
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }}
+
+        .grid-4 {{
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }}
+
+        .config-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }}
+
+        .config-card {{
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }}
+
+        .config-header {{
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }}
+
+        .config-body {{
+            padding: 0;
+        }}
+
+        .compact-table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }}
+
+        .compact-table th,
+        .compact-table td {{
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }}
+
+        .compact-table th {{
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-primary);
+            width: 40%;
+        }}
+
+        .compact-table td {{
+            color: var(--text-secondary);
+        }}
+
+        .compact-table tr:last-child th,
+        .compact-table tr:last-child td {{
+            border-bottom: none;
+        }}
+
+        .compact-table tr:hover {{
+            background-color: #f8fafc;
+        }}
+
+        @media (max-width: 768px) {{
+            .config-grid {{
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }}
         }}
 
         .metric-card {{
@@ -537,6 +623,23 @@ def get_html_template() -> str:
             padding: 1.5rem;
         }}
 
+        .narrative-section {{
+            margin-bottom: 1.5rem;
+        }}
+
+        .narrative-text {{
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: Georgia, serif;
+        }}
+
         .question-section {{
             margin-bottom: 1.5rem;
         }}
@@ -644,6 +747,123 @@ def get_html_template() -> str:
             margin-top: 0.5rem;
             padding-top: 0.5rem;
             border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }}
+
+        .direct-answer-note {{
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #92400e;
+            font-style: italic;
+            text-align: center;
+        }}
+
+        /* Enhanced Response Section Styles */
+        .response-section {{
+            margin: 1.5rem 0;
+        }}
+
+        .model-response {{
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }}
+
+        .model-response.response-correct {{
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }}
+
+        .model-response.response-incorrect {{
+            border-color: var(--danger-color);
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        }}
+
+        .response-header {{
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }}
+
+        .response-icon {{
+            font-size: 1.1rem;
+        }}
+
+        .response-status {{
+            font-weight: 600;
+            color: var(--text-primary);
+        }}
+
+        .response-content {{
+            padding: 1rem;
+            line-height: 1.5;
+        }}
+
+        /* Correct Answer Section Styles */
+        .correct-answer-section {{
+            margin: 1.5rem 0;
+        }}
+
+        .correct-answer {{
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid var(--success-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }}
+
+        .answer-content {{
+            line-height: 1.5;
+            color: var(--text-primary);
+        }}
+
+        /* Confidence Section Styles */
+        .confidence-section {{
+            margin: 1.5rem 0;
+        }}
+
+        .confidence-scores {{
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }}
+
+        .confidence-item {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }}
+
+        .confidence-item:last-child {{
+            border-bottom: none;
+        }}
+
+        .confidence-item.selected-confidence {{
+            background: rgba(37, 99, 235, 0.1);
+            margin: 0 -0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.2);
+        }}
+
+        .conf-label {{
+            font-weight: 600;
+            color: var(--text-primary);
+        }}
+
+        .conf-score {{
+            font-family: 'Courier New', monospace;
+            background: #f8fafc;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
         }}
 
         .results-section {{
@@ -819,15 +1039,17 @@ def get_html_template() -> str:
             initializeCharts();
             initializeTabs();
             animateProgressBars();
+            initializeComparison();
         }});
 
         function initializeCharts() {{
             // Performance overview chart
             const ctx = document.getElementById('performanceChart');
             if (ctx) {{
-                new Chart(ctx, {{
+                const chartData = {chart_data};
+                const chart = new Chart(ctx, {{
                     type: 'radar',
-                    data: {chart_data},
+                    data: chartData,
                     options: {{
                         responsive: true,
                         maintainAspectRatio: false,
@@ -837,7 +1059,7 @@ def get_html_template() -> str:
                             }},
                             title: {{
                                 display: true,
-                                text: 'Performance Overview'
+                                text: 'Performance Overview - Interactive Comparison Available'
                             }}
                         }},
                         scales: {{
@@ -848,6 +1070,9 @@ def get_html_template() -> str:
                         }}
                     }}
                 }});
+                
+                // Store original chart data for comparison
+                storeOriginalChartData(chart, chartData);
             }}
 
             // Task comparison chart
@@ -906,6 +1131,8 @@ def get_html_template() -> str:
                 }}, 100);
             }});
         }}
+
+        {comparison_javascript}
     </script>
 </body>
 </html>"""
@@ -1032,16 +1259,18 @@ def generate_executive_summary(results_data: Dict[str, Any], model_info: Dict[st
     return '\n'.join(html)
 
 def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, Any]) -> str:
-    """Generate comprehensive model configuration section."""
+    """Generate comprehensive model configuration section with space-efficient multi-column layout."""
     html = ['<div class="card">']
     html.append('<h2>⚙️ Model Configuration</h2>')
     
-    # Basic Model Information Section
-    html.append('<h3>🔧 Basic Model Information</h3>')
-    html.append('<div class="table-container">')
-    html.append('<table>')
-    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
-    html.append('<tbody>')
+    # Use multi-column grid layout for space efficiency
+    html.append('<div class="config-grid">')
+    
+    # Basic Model Information Card
+    html.append('<div class="config-card">')
+    html.append('<div class="config-header">🔧 Basic Model Information</div>')
+    html.append('<div class="config-body">')
+    html.append('<table class="compact-table">')
     
     basic_info = [
         ("Model Name", model_info.get("name", "Unknown")),
@@ -1055,18 +1284,17 @@ def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, A
     ]
     
     for param, value in basic_info:
-        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+        html.append(f'<tr><th>{param}</th><td>{value}</td></tr>')
     
-    html.append('</tbody>')
     html.append('</table>')
     html.append('</div>')
+    html.append('</div>')
     
-    # Hardware and Performance Configuration
-    html.append('<h3>🖥️ Hardware & Performance Configuration</h3>')
-    html.append('<div class="table-container">')
-    html.append('<table>')
-    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
-    html.append('<tbody>')
+    # Hardware & Performance Configuration Card
+    html.append('<div class="config-card">')
+    html.append('<div class="config-header">🖥️ Hardware & Performance Configuration</div>')
+    html.append('<div class="config-body">')
+    html.append('<table class="compact-table">')
     
     hardware_info = [
         ("Device Mapping", model_info.get("device_mapping", "Single GPU")),
@@ -1080,18 +1308,17 @@ def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, A
     ]
     
     for param, value in hardware_info:
-        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+        html.append(f'<tr><th>{param}</th><td>{value}</td></tr>')
     
-    html.append('</tbody>')
     html.append('</table>')
     html.append('</div>')
+    html.append('</div>')
     
-    # Advanced Features and Optimization
-    html.append('<h3>⚡ Advanced Features & Optimization</h3>')
-    html.append('<div class="table-container">')
-    html.append('<table>')
-    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
-    html.append('<tbody>')
+    # Advanced Features & Optimization Card
+    html.append('<div class="config-card">')
+    html.append('<div class="config-header">⚡ Advanced Features & Optimization</div>')
+    html.append('<div class="config-body">')
+    html.append('<table class="compact-table">')
     
     advanced_info = [
         ("Attention Implementation", model_info.get("attention_implementation", "Not specified")),
@@ -1105,18 +1332,17 @@ def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, A
     ]
     
     for param, value in advanced_info:
-        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+        html.append(f'<tr><th>{param}</th><td>{value}</td></tr>')
     
-    html.append('</tbody>')
     html.append('</table>')
     html.append('</div>')
+    html.append('</div>')
     
-    # Generation Parameters
-    html.append('<h3>🎯 Generation Parameters</h3>')
-    html.append('<div class="table-container">')
-    html.append('<table>')
-    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
-    html.append('<tbody>')
+    # Generation Parameters Card
+    html.append('<div class="config-card">')
+    html.append('<div class="config-header">🎯 Generation Parameters</div>')
+    html.append('<div class="config-body">')
+    html.append('<table class="compact-table">')
     
     generation_info = [
         ("Temperature", model_info.get("temperature", "Not specified")),
@@ -1132,18 +1358,17 @@ def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, A
     ]
     
     for param, value in generation_info:
-        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+        html.append(f'<tr><th>{param}</th><td>{value}</td></tr>')
     
-    html.append('</tbody>')
     html.append('</table>')
     html.append('</div>')
+    html.append('</div>')
     
-    # Evaluation Configuration
-    html.append('<h3>📋 Evaluation Configuration</h3>')
-    html.append('<div class="table-container">')
-    html.append('<table>')
-    html.append('<thead><tr><th>Parameter</th><th>Value</th></tr></thead>')
-    html.append('<tbody>')
+    # Evaluation Configuration Card
+    html.append('<div class="config-card">')
+    html.append('<div class="config-header">📋 Evaluation Configuration</div>')
+    html.append('<div class="config-body">')
+    html.append('<table class="compact-table">')
     
     eval_info = [
         ("Evaluated Tasks", model_info.get("evaluated_tasks", "Not specified")),
@@ -1153,31 +1378,32 @@ def generate_model_configuration(model_info: Dict[str, Any], config: Dict[str, A
     ]
     
     for param, value in eval_info:
-        html.append(f'<tr><td><strong>{param}</strong></td><td>{value}</td></tr>')
+        html.append(f'<tr><th>{param}</th><td>{value}</td></tr>')
     
-    html.append('</tbody>')
     html.append('</table>')
     html.append('</div>')
+    html.append('</div>')
     
-    # Architecture Details (if available)
+    # Architecture Details Card (if available)
     if model_info.get("name", "Unknown") != "Unknown":
         arch_info = get_model_architecture_info(model_info["name"])
         if arch_info.get("family", "Unknown") != "Unknown":
-            html.append('<h3>🏗️ Architecture Details</h3>')
-            html.append('<div class="table-container">')
-            html.append('<table>')
-            html.append('<thead><tr><th>Aspect</th><th>Details</th></tr></thead>')
-            html.append('<tbody>')
+            html.append('<div class="config-card">')
+            html.append('<div class="config-header">🏗️ Architecture Details</div>')
+            html.append('<div class="config-body">')
+            html.append('<table class="compact-table">')
             
             for key, value in arch_info.items():
                 if key != "family":  # Skip family as it's redundant with architecture
                     display_key = key.replace("_", " ").title()
-                    html.append(f'<tr><td><strong>{display_key}</strong></td><td>{value}</td></tr>')
+                    html.append(f'<tr><th>{display_key}</th><td>{value}</td></tr>')
             
-            html.append('</tbody>')
             html.append('</table>')
             html.append('</div>')
+            html.append('</div>')
     
+    # Close the grid layout
+    html.append('</div>')
     html.append('</div>')
     return '\n'.join(html)
 
@@ -1246,12 +1472,21 @@ def generate_task_results(results_data: Dict[str, Any]) -> str:
         html.append('</div>')
         return '\n'.join(html)
     
+    # Add model comparison controls if available
+    if COMPARISON_AVAILABLE:
+        try:
+            available_models = get_available_comparison_models()
+            comparison_html = generate_comparison_dropdown_html(available_models)
+            html.append(comparison_html)
+        except Exception as e:
+            print(f"⚠️ Error generating comparison controls: {e}")
+    
     # Add performance charts
     html.append('<div class="chart-container">')
     html.append('<canvas id="taskChart"></canvas>')
     html.append('</div>')
     
-    # Performance radar chart
+    # Performance radar chart with comparison capability
     html.append('<div class="chart-container">')
     html.append('<canvas id="performanceChart"></canvas>')
     html.append('</div>')
@@ -1283,7 +1518,7 @@ def generate_task_results(results_data: Dict[str, Any]) -> str:
     return '\n'.join(html)
 
 def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
-    """Generate sample analysis section with tabs and proper hellaswag context handling."""
+    """Generate sample analysis section with tabs and enhanced Zeno-style presentation."""
     html = ['<div class="card">']
     html.append('<h2>🔍 Sample Analysis</h2>')
     
@@ -1303,7 +1538,8 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
     html.append('<div class="tabs">')
     for i, task in enumerate(task_names):
         active_class = 'active' if i == 0 else ''
-        html.append(f'<button class="tab {active_class}" data-tab="task-{i}">{task}</button>')
+        display_name = task.replace('leaderboard_', '').replace('_', ' ').title()
+        html.append(f'<button class="tab {active_class}" data-tab="task-{i}">{display_name}</button>')
     html.append('</div>')
     
     # Tab contents
@@ -1311,8 +1547,16 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
         active_class = 'active' if i == 0 else ''
         html.append(f'<div id="task-{i}" class="tab-content {active_class}">')
         
-        # Check if this is a hellaswag task
+        # Detect task type for proper formatting
         is_hellaswag = 'hellaswag' in task.lower()
+        is_mmlu = 'mmlu' in task.lower() 
+        is_bbh = 'bbh' in task.lower()
+        is_math = 'math' in task.lower()
+        is_gsm8k = 'gsm8k' in task.lower()
+        is_truthfulqa = 'truthfulqa' in task.lower()
+        is_musr = 'musr' in task.lower()
+        is_gpqa = 'gpqa' in task.lower()
+        is_ifeval = 'ifeval' in task.lower()
         
         # Show up to 5 samples per task
         displayed_samples = 0
@@ -1322,231 +1566,205 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
             if displayed_samples >= max_samples:
                 break
             
-            # Determine if sample is correct based on target and model selection
-            is_correct = False
-            model_choice_index = None
-            model_choice_label = None
-            model_choice_text = None
+            # Extract all the information we need
+            doc = sample.get('doc', {})
+            target = sample.get('target')
             
-            # Get the correct answer information
-            target_index = sample.get('target')
+            # Get question/context text
+            question_text = ""
+            narrative_text = ""
             
-            # Convert target_index to integer if it's a string
-            if target_index is not None:
-                try:
-                    target_index = int(target_index)
-                except (ValueError, TypeError):
-                    target_index = None
+            if is_musr:
+                # MUSR tasks have both narrative and question
+                narrative_text = doc.get('narrative', '')
+                question_text = doc.get('question', '')
+            elif is_hellaswag:
+                # HellaSwag uses ctx field
+                question_text = doc.get('ctx', '') or doc.get('ctx_a', '')
+                if 'ctx_b' in doc and doc['ctx_b']:
+                    question_text += " " + doc['ctx_b']
+            elif is_gpqa:
+                # GPQA uses 'Question' field (capital Q)
+                question_text = doc.get('Question', '')
+            elif is_math:
+                # MATH tasks use 'problem' field
+                question_text = doc.get('problem', '')
+            elif is_ifeval:
+                # IFEVAL uses 'prompt' field
+                question_text = doc.get('prompt', '')
+            elif 'question' in doc:
+                question_text = doc['question']
+            elif 'input' in doc:
+                question_text = doc['input']
             
-            correct_choice_label = None
-            correct_choice_text = None
+            # Get answer choices
+            choices_info = extract_choices_from_doc(doc, is_hellaswag, is_mmlu, is_bbh, is_musr, is_gpqa, is_math, is_ifeval, sample)
+            choice_labels = choices_info['labels']
+            choice_texts = choices_info['texts']
             
-            if 'doc' in sample and sample['doc'].get('choices'):
-                choices = sample['doc']['choices']
-                labels = []
-                texts = []
-                
-                # Handle different choice formats
-                if isinstance(choices, dict) and 'text' in choices and 'label' in choices:
-                    # Dictionary format: {'text': [...], 'label': [...]}
-                    labels = choices['label']
-                    texts = choices['text']
-                elif isinstance(choices, list):
-                    # List format: ['option1', 'option2', ...]
-                    texts = choices
-                    labels = [chr(65 + i) for i in range(len(choices))]  # A, B, C, D...
-                else:
-                    # For hellaswag, choices might be in 'endings' field
-                    if is_hellaswag and 'endings' in sample['doc']:
-                        texts = sample['doc']['endings']
-                        labels = [chr(65 + i) for i in range(len(texts))]
-                    else:
-                        # Fallback for other formats
-                        labels = []
-                        texts = []
-                
-                # Get correct answer
-                if target_index is not None and target_index < len(labels) and target_index < len(texts):
-                    correct_choice_label = labels[target_index]
-                    correct_choice_text = texts[target_index]
-                
-                # Determine model's choice from filtered_resps (highest log probability)
-                if 'filtered_resps' in sample and sample['filtered_resps']:
-                    log_probs = []
-                    for resp in sample['filtered_resps']:
-                        if isinstance(resp, list) and len(resp) >= 1:
-                            log_probs.append(resp[0])  # First element is log probability
-                        else:
-                            log_probs.append(float('-inf'))
-                    
-                    if log_probs:
-                        # Model choice is the one with highest log probability (least negative)
-                        model_choice_index = log_probs.index(max(log_probs))
-                        if model_choice_index < len(labels) and model_choice_index < len(texts):
-                            model_choice_label = labels[model_choice_index]
-                            model_choice_text = texts[model_choice_index]
-                            
-                        # Check if model's choice matches target
-                        is_correct = model_choice_index == target_index
+            # Determine correct answer
+            correct_info = determine_correct_answer(target, choice_labels, choice_texts, doc)
+            correct_choice_label = correct_info['label']
+            correct_choice_text = correct_info['text']
+            correct_choice_index = correct_info['index']
             
+            # Determine model's answer
+            model_info = determine_model_answer(sample, choice_labels, choice_texts)
+            model_choice_label = model_info['label']
+            model_choice_text = model_info['text'] 
+            model_choice_index = model_info['index']
+            model_raw_response = model_info['raw_response']
+            
+            # Check if correct
+            is_correct = (model_choice_index == correct_choice_index) if (model_choice_index is not None and correct_choice_index is not None) else False
+            
+            # Generate ZENO-style sample card
             correctness_class = 'correct' if is_correct else 'incorrect'
             correctness_icon = '✅' if is_correct else '❌'
             
-            # ZENO-style professional sample card
             html.append(f'<div class="zeno-sample-card {correctness_class}">')
             html.append(f'<div class="zeno-sample-header">')
             html.append(f'<span class="sample-status">{correctness_icon} Sample {displayed_samples + 1}</span>')
-            html.append(f'<span class="sample-task">{task.upper()}</span>')
+            
+            # Add task-specific badges
+            task_badge = task.replace('leaderboard_', '').upper()
+            html.append(f'<span class="sample-task">{task_badge}</span>')
+            
+            # Add activity label for hellaswag
+            if is_hellaswag and 'activity_label' in doc:
+                html.append(f'<span class="activity-badge">{doc["activity_label"]}</span>')
+            
             html.append('</div>')
             
             html.append('<div class="zeno-sample-content">')
             
-            # Question/Context Section (ZENO-style)
+            # SECTION 1: Narrative (for MUSR tasks)
+            if is_musr and narrative_text:
+                html.append('<div class="narrative-section">')
+                html.append(f'<h4 class="section-label">📚 Narrative</h4>')
+                html.append(f'<div class="narrative-text">{narrative_text}</div>')
+                html.append('</div>')
+            
+            # SECTION 2: Question/Context
             html.append('<div class="question-section">')
-            
-            # Show activity label for hellaswag in a professional way
-            if is_hellaswag and 'doc' in sample and 'activity_label' in sample['doc']:
-                html.append(f'<div class="activity-badge">{sample["doc"]["activity_label"]}</div>')
-            
-            # Display question or context with clear labeling
-            if is_hellaswag:
-                # For hellaswag, show the context (ctx) field
-                if 'doc' in sample:
-                    doc = sample['doc']
-                    context = ""
-                    
-                    # HellaSwag can have context in different fields
-                    if 'ctx' in doc:
-                        context = doc['ctx']
-                    elif 'ctx_a' in doc:
-                        # Some versions split context into ctx_a and ctx_b
-                        context = doc['ctx_a']
-                        if 'ctx_b' in doc and doc['ctx_b']:
-                            context += " " + doc['ctx_b']
-                    
-                    if context:
-                        html.append(f'<h4 class="section-label">📖 Context</h4>')
-                        html.append(f'<div class="question-text">{context}</div>')
+            if is_musr:
+                section_label = "❓ Question"
+            elif is_hellaswag:
+                section_label = "📖 Context"
             else:
-                # For other tasks, show the question field
-                if 'doc' in sample and 'question' in sample['doc']:
-                    html.append(f'<h4 class="section-label">❓ Question</h4>')
-                    html.append(f'<div class="question-text">{sample["doc"]["question"]}</div>')
+                section_label = "❓ Question"
+            html.append(f'<h4 class="section-label">{section_label}</h4>')
+            if question_text:
+                html.append(f'<div class="question-text">{question_text}</div>')
+            else:
+                html.append('<div class="question-text"><em>No question text available</em></div>')
+            html.append('</div>')
             
-            html.append('</div>')  # End question-section
-            
-            # Choices Section (ZENO-style professional layout)
-            if 'doc' in sample:
-                doc = sample['doc']
-                choices = None
-                labels = []
-                texts = []
+            # SECTION 3: Answer Choices (if available)
+            if choice_labels and choice_texts:
+                html.append('<div class="choices-section">')
+                html.append(f'<h4 class="section-label">📋 Answer Choices</h4>')
+                html.append('<div class="zeno-choice-grid">')
                 
-                # Get choices from appropriate field
-                if 'choices' in doc:
-                    choices = doc['choices']
-                elif is_hellaswag and 'endings' in doc:
-                    choices = doc['endings']
-                
-                if choices:
-                    # Handle different choice formats
-                    if isinstance(choices, dict) and 'text' in choices and 'label' in choices:
-                        # Dictionary format: {'text': [...], 'label': [...]}
-                        labels = choices['label']
-                        texts = choices['text']
-                    elif isinstance(choices, list):
-                        # List format: ['option1', 'option2', ...]
-                        texts = choices
-                        labels = [chr(65 + i) for i in range(len(choices))]  # A, B, C, D...
-                
-                if labels and texts:
-                    html.append('<div class="choices-section">')
-                    html.append(f'<h4 class="section-label">📋 Answer Choices</h4>')
-                    html.append('<div class="zeno-choice-grid">')
+                for idx, (label, text) in enumerate(zip(choice_labels, choice_texts)):
+                    choice_classes = ["zeno-choice-option"]
+                    choice_indicators = []
                     
-                    for idx, (label, text) in enumerate(zip(labels, texts)):
-                        choice_classes = ["zeno-choice-option"]
-                        choice_indicators = []
-                        
-                        # Highlight correct answer
-                        if idx == target_index:
-                            choice_classes.append("choice-correct")
-                            choice_indicators.append("✓ Correct")
-                        
-                        # Highlight model's choice  
-                        if idx == model_choice_index:
-                            choice_classes.append("choice-selected")
-                            choice_indicators.append("🤖 Selected")
-                        
-                        indicator_text = " • ".join(choice_indicators) if choice_indicators else ""
-                        
-                        html.append(f'<div class="{" ".join(choice_classes)}">')
-                        html.append(f'<div class="choice-label">{label}</div>')
-                        html.append(f'<div class="choice-text">{text}</div>')
-                        if indicator_text:
-                            html.append(f'<div class="choice-indicators">{indicator_text}</div>')
-                        html.append('</div>')
+                    # Highlight correct answer
+                    if idx == correct_choice_index:
+                        choice_classes.append("choice-correct")
+                        choice_indicators.append("✓ Correct")
                     
-                    html.append('</div>')  # End zeno-choice-grid
-                    html.append('</div>')  # End choices-section
+                    # Highlight model's choice  
+                    if idx == model_choice_index:
+                        choice_classes.append("choice-selected")
+                        choice_indicators.append("🤖 Selected")
+                    
+                    indicator_text = " • ".join(choice_indicators) if choice_indicators else ""
+                    
+                    html.append(f'<div class="{" ".join(choice_classes)}">')
+                    html.append(f'<div class="choice-label">{label}</div>')
+                    html.append(f'<div class="choice-text">{text}</div>')
+                    if indicator_text:
+                        html.append(f'<div class="choice-indicators">{indicator_text}</div>')
+                    html.append('</div>')
+                
+                html.append('</div>')  # End zeno-choice-grid
+                html.append('</div>')  # End choices-section
+            elif is_math or is_ifeval:
+                # For direct answer tasks, show a note
+                html.append('<div class="choices-section">')
+                html.append(f'<h4 class="section-label">📋 Answer Type</h4>')
+                task_type = "Mathematical Expression" if is_math else "Instruction Following"
+                html.append(f'<div class="direct-answer-note">This is a direct answer task ({task_type}) - no multiple choice options.</div>')
+                html.append('</div>')  # End choices-section
             
-            # Results Section (ZENO-style)
-            html.append('<div class="results-section">')
+            # SECTION 4: Model Response
+            html.append('<div class="response-section">')
+            html.append(f'<h4 class="section-label">🤖 Model Response</h4>')
             
-            # Correct answer display
-            if correct_choice_label and correct_choice_text:
-                html.append('<div class="result-item correct-result">')
-                html.append('<div class="result-header">')
-                html.append('<span class="result-icon">✅</span>')
-                html.append('<span class="result-label">Correct Answer</span>')
-                html.append('</div>')
-                html.append(f'<div class="result-content"><strong>{correct_choice_label}:</strong> {correct_choice_text}</div>')
-                html.append('</div>')
+            response_class = "response-correct" if is_correct else "response-incorrect"
+            result_icon = "✅" if is_correct else "❌"
+            result_status = "Correct" if is_correct else "Incorrect"
             
-            # Model's response display
+            html.append(f'<div class="model-response {response_class}">')
+            html.append('<div class="response-header">')
+            html.append(f'<span class="response-icon">{result_icon}</span>')
+            html.append(f'<span class="response-status">{result_status}</span>')
+            html.append('</div>')
+            
             if model_choice_label and model_choice_text:
-                response_class = "correct-result" if is_correct else "incorrect-result"
-                result_icon = "✅" if is_correct else "❌"
-                result_status = "Correct" if is_correct else "Incorrect"
-                
-                html.append(f'<div class="result-item {response_class}">')
-                html.append('<div class="result-header">')
-                html.append(f'<span class="result-icon">{result_icon}</span>')
-                html.append(f'<span class="result-label">Model Response ({result_status})</span>')
+                html.append(f'<div class="response-content">')
+                html.append(f'<strong>Answer:</strong> {model_choice_label} - {model_choice_text}')
                 html.append('</div>')
-                html.append(f'<div class="result-content"><strong>{model_choice_label}:</strong> {model_choice_text}</div>')
-                
-                # Show confidence scores if available
-                if 'filtered_resps' in sample and sample['filtered_resps']:
-                    html.append('<div class="confidence-scores">')
-                    html.append('<h5>Confidence Scores:</h5>')
-                    for idx, resp in enumerate(sample['filtered_resps'][:len(labels)]):
-                        if isinstance(resp, list) and len(resp) >= 1:
-                            prob = resp[0]
-                            label = labels[idx] if idx < len(labels) else f"Option {idx+1}"
-                            confidence = f"{prob:.4f}"
-                            highlight = "selected-confidence" if idx == model_choice_index else ""
-                            html.append(f'<div class="confidence-item {highlight}">')
-                            html.append(f'<span class="conf-label">{label}:</span>')
-                            html.append(f'<span class="conf-score">{confidence}</span>')
-                            html.append('</div>')
-                    html.append('</div>')
-                
+            elif model_raw_response:
+                html.append(f'<div class="response-content">')
+                html.append(f'<strong>Raw Response:</strong> {model_raw_response}')
                 html.append('</div>')
             else:
-                # Fallback to show raw response if parsing fails
-                if 'filtered_resps' in sample and sample['filtered_resps']:
-                    html.append('<div class="result-item raw-result">')
-                    html.append('<div class="result-header">')
-                    html.append('<span class="result-icon">🤖</span>')
-                    html.append('<span class="result-label">Model Response (Raw)</span>')
-                    html.append('</div>')
-                    raw_response = str(sample["filtered_resps"])
-                    truncated_response = raw_response[:200] + "..." if len(raw_response) > 200 else raw_response
-                    html.append(f'<div class="result-content raw-content">{truncated_response}</div>')
-                    html.append('</div>')
+                html.append('<div class="response-content"><em>No response available</em></div>')
             
-            html.append('</div>')  # End results-section
+            html.append('</div>')
+            html.append('</div>')  # End response-section
+            
+            # SECTION 5: Correct Answer
+            html.append('<div class="correct-answer-section">')
+            html.append(f'<h4 class="section-label">✅ Correct Answer</h4>')
+            
+            html.append('<div class="correct-answer">')
+            if correct_choice_label and correct_choice_text:
+                html.append(f'<div class="answer-content">')
+                html.append(f'<strong>Answer:</strong> {correct_choice_label} - {correct_choice_text}')
+                html.append('</div>')
+            elif target:
+                html.append(f'<div class="answer-content">')
+                html.append(f'<strong>Target:</strong> {target}')
+                html.append('</div>')
+            else:
+                html.append('<div class="answer-content"><em>No correct answer available</em></div>')
+            html.append('</div>')
+            html.append('</div>')  # End correct-answer-section
+            
+            # SECTION 6: Confidence Scores (if available)
+            if 'filtered_resps' in sample and sample['filtered_resps'] and choice_labels:
+                html.append('<div class="confidence-section">')
+                html.append(f'<h4 class="section-label">📊 Model Confidence</h4>')
+                html.append('<div class="confidence-scores">')
+                
+                for idx, resp in enumerate(sample['filtered_resps'][:len(choice_labels)]):
+                    if isinstance(resp, list) and len(resp) >= 1:
+                        prob = resp[0]
+                        label = choice_labels[idx] if idx < len(choice_labels) else f"Option {idx+1}"
+                        confidence = f"{prob:.4f}"
+                        highlight = "selected-confidence" if idx == model_choice_index else ""
+                        html.append(f'<div class="confidence-item {highlight}">')
+                        html.append(f'<span class="conf-label">{label}:</span>')
+                        html.append(f'<span class="conf-score">{confidence}</span>')
+                        html.append('</div>')
+                
+                html.append('</div>')
+                html.append('</div>')  # End confidence-section
+            
             html.append('</div>')  # End zeno-sample-content
             html.append('</div>')  # End zeno-sample-card
             
@@ -1560,6 +1778,254 @@ def generate_sample_analysis(results_data: Dict[str, Any]) -> str:
     html.append('</div>')
     
     return '\n'.join(html)
+
+def extract_bbh_choices_from_text(input_text: str) -> tuple:
+    """Extract choices from BBH input text."""
+    import re
+    
+    choice_texts = []
+    choice_labels = []
+    
+    # Look for common patterns in BBH tasks
+    patterns = [
+        r'Options:\s*\n(.*?)(?:\n\n|\Z)',  # Options: followed by choices
+        r'Answer Choices:\s*\n(.*?)(?:\n\n|\Z)',  # Answer Choices: followed by choices
+        r'\n((?:(?:\([A-F]\)|[A-F]\.?)\s+.*?\n)+)',  # (A) or A. style choices
+        r'\n((?:(?:- .*?\n)+))',  # - style choices
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, input_text, re.DOTALL | re.MULTILINE)
+        if match:
+            choices_section = match.group(1).strip()
+            
+            # Extract individual choices
+            choice_lines = []
+            for line in choices_section.split('\n'):
+                line = line.strip()
+                if line and (re.match(r'^[(-]|^[A-F][\.\)]', line) or line.startswith('-')):
+                    choice_lines.append(line)
+            
+            if choice_lines:
+                for line in choice_lines:
+                    # Extract label and text
+                    if re.match(r'^\([A-F]\)', line):
+                        label = line[1]
+                        text = line[3:].strip()
+                    elif re.match(r'^[A-F][\.\)]', line):
+                        label = line[0]
+                        text = line[2:].strip() if line[1] == '.' else line[1:].strip()
+                    elif line.startswith('- '):
+                        label = chr(65 + len(choice_labels))  # A, B, C...
+                        text = line[2:].strip()
+                    else:
+                        continue
+                    
+                    choice_labels.append(label)
+                    choice_texts.append(text)
+                break
+    
+    return choice_texts, choice_labels
+
+
+def extract_choices_from_doc(doc: Dict, is_hellaswag: bool = False, is_mmlu: bool = False, is_bbh: bool = False, is_musr: bool = False, is_gpqa: bool = False, is_math: bool = False, is_ifeval: bool = False, sample: Dict = None) -> Dict:
+    """Extract choice labels and texts from document."""
+    choice_labels = []
+    choice_texts = []
+    
+    if is_musr and 'choices' in doc:
+        # MUSR choices are stored as a string representation of a list
+        choices_str = doc['choices']
+        try:
+            # Parse the string representation of the list
+            import ast
+            choice_texts = ast.literal_eval(choices_str)
+            choice_labels = [f"{i+1}" for i in range(len(choice_texts))]  # 1, 2, 3...
+        except:
+            # Fallback if parsing fails
+            choice_texts = [choices_str]
+            choice_labels = ["1"]
+    elif is_gpqa:
+        # GPQA has choice1, choice2, choice3, choice4 fields
+        choices = []
+        for i in range(1, 5):  # Usually 4 choices
+            choice_key = f'choice{i}'
+            if choice_key in doc and doc[choice_key]:
+                choices.append(doc[choice_key])
+        if choices:
+            choice_texts = choices
+            choice_labels = [chr(65 + i) for i in range(len(choices))]  # A, B, C, D
+    elif is_bbh:
+        # BBH tasks have choices embedded in the input text OR in arguments
+        input_text = doc.get('input', '')
+        choice_texts, choice_labels = extract_bbh_choices_from_text(input_text)
+        
+        # If no choices found in input text, check arguments field
+        if not choice_texts and sample and 'arguments' in sample:
+            arguments = sample.get('arguments', [])
+            if arguments and len(arguments) >= 2:
+                # Extract the completion text from arguments
+                choice_texts = []
+                for arg in arguments:
+                    if len(arg) >= 2:
+                        completion = arg[1]
+                        if isinstance(completion, str):
+                            choice_texts.append(completion.strip())
+                        else:
+                            choice_texts.append(str(completion).strip())
+                
+                if choice_texts:
+                    choice_labels = [chr(65 + i) for i in range(len(choice_texts))]  # A, B, C...
+    elif is_math or is_ifeval:
+        # MATH and IFEVAL tasks don't have multiple choices - they're direct answer tasks
+        choice_texts = []
+        choice_labels = []
+    elif is_hellaswag and 'endings' in doc:
+        # HellaSwag uses endings
+        choice_texts = doc['endings']
+        choice_labels = [f"Option {i+1}" for i in range(len(choice_texts))]
+    elif is_mmlu and 'options' in doc:
+        # MMLU uses options
+        choice_texts = doc['options']
+        choice_labels = [chr(65 + i) for i in range(len(choice_texts))]  # A, B, C, D...
+    elif 'choices' in doc:
+        choices = doc['choices']
+        if isinstance(choices, dict):
+            if 'text' in choices and 'label' in choices:
+                # Dictionary format: {'text': [...], 'label': [...]}
+                choice_labels = choices['label']
+                choice_texts = choices['text']
+            elif 'text' in choices:
+                choice_texts = choices['text']
+                choice_labels = [chr(65 + i) for i in range(len(choice_texts))]
+        elif isinstance(choices, list):
+            # List format: ['option1', 'option2', ...]
+            choice_texts = choices
+            choice_labels = [chr(65 + i) for i in range(len(choice_texts))]
+    elif 'options' in doc:
+        # Generic options field
+        choice_texts = doc['options']
+        choice_labels = [chr(65 + i) for i in range(len(choice_texts))]
+    
+    return {
+        'labels': choice_labels,
+        'texts': choice_texts
+    }
+
+def determine_correct_answer(target, choice_labels: list, choice_texts: list, doc: Dict) -> Dict:
+    """Determine the correct answer from target and choices."""
+    correct_choice_label = None
+    correct_choice_text = None
+    correct_choice_index = None
+    
+    if target is not None and choice_labels and choice_texts:
+        # Try to match target to choice
+        if isinstance(target, str):
+            # Target might be a label (A, B, C) or text
+            if target in choice_labels:
+                correct_choice_index = choice_labels.index(target)
+                correct_choice_label = target
+                correct_choice_text = choice_texts[correct_choice_index] if correct_choice_index < len(choice_texts) else ""
+            elif target in choice_texts:
+                correct_choice_index = choice_texts.index(target)
+                correct_choice_text = target
+                correct_choice_label = choice_labels[correct_choice_index] if correct_choice_index < len(choice_labels) else f"Option {correct_choice_index + 1}"
+            else:
+                # Try converting letter to index
+                if len(target) == 1 and target.upper() in 'ABCDEFGHIJ':
+                    idx = ord(target.upper()) - ord('A')
+                    if idx < len(choice_labels) and idx < len(choice_texts):
+                        correct_choice_index = idx
+                        correct_choice_label = choice_labels[idx]
+                        correct_choice_text = choice_texts[idx]
+        elif isinstance(target, int):
+            # Target is an index
+            if 0 <= target < len(choice_labels) and target < len(choice_texts):
+                correct_choice_index = target
+                correct_choice_label = choice_labels[target]
+                correct_choice_text = choice_texts[target]
+    
+    # If we couldn't parse it from choices, just use the raw target
+    if correct_choice_label is None and target is not None:
+        correct_choice_label = str(target)
+        correct_choice_text = str(target)
+    
+    return {
+        'label': correct_choice_label,
+        'text': correct_choice_text,
+        'index': correct_choice_index
+    }
+
+def determine_model_answer(sample: Dict, choice_labels: list, choice_texts: list) -> Dict:
+    """Determine the model's answer from the sample data."""
+    model_choice_label = None
+    model_choice_text = None
+    model_choice_index = None
+    model_raw_response = None
+    
+    # Special handling for BBH tasks with arguments
+    arguments = sample.get('arguments', [])
+    filtered_resps = sample.get('filtered_resps', [])
+    
+    if arguments and filtered_resps and len(arguments) == len(filtered_resps):
+        # For BBH tasks, find the argument/response with highest probability
+        log_probs = []
+        for resp in filtered_resps:
+            if isinstance(resp, list) and len(resp) >= 1:
+                log_probs.append(resp[0])  # First element is log probability
+            else:
+                log_probs.append(float('-inf'))
+        
+        if log_probs:
+            # Model choice is the one with highest log probability (least negative)
+            model_choice_index = log_probs.index(max(log_probs))
+            
+            # Get the completion from arguments
+            if model_choice_index < len(arguments) and len(arguments[model_choice_index]) >= 2:
+                completion = arguments[model_choice_index][1]
+                if isinstance(completion, str):
+                    model_choice_text = completion.strip()
+                else:
+                    model_choice_text = str(completion).strip()
+                
+                # Match to choice labels if available
+                if model_choice_index < len(choice_labels):
+                    model_choice_label = choice_labels[model_choice_index]
+                else:
+                    model_choice_label = chr(65 + model_choice_index)  # A, B, C...
+    
+    # Standard handling for other tasks with regular choices
+    elif filtered_resps and choice_labels and choice_texts:
+        log_probs = []
+        for resp in filtered_resps:
+            if isinstance(resp, list) and len(resp) >= 1:
+                log_probs.append(resp[0])  # First element is log probability
+            else:
+                log_probs.append(float('-inf'))
+        
+        if log_probs:
+            # Model choice is the one with highest log probability (least negative)
+            model_choice_index = log_probs.index(max(log_probs))
+            if model_choice_index < len(choice_labels) and model_choice_index < len(choice_texts):
+                model_choice_label = choice_labels[model_choice_index]
+                model_choice_text = choice_texts[model_choice_index]
+    
+    # Get raw response for fallback
+    if filtered_resps:
+        model_raw_response = str(filtered_resps)
+        if len(model_raw_response) > 200:
+            model_raw_response = model_raw_response[:200] + "..."
+    elif 'resps' in sample:
+        model_raw_response = str(sample['resps'])
+        if len(model_raw_response) > 200:
+            model_raw_response = model_raw_response[:200] + "..."
+    
+    return {
+        'label': model_choice_label,
+        'text': model_choice_text,
+        'index': model_choice_index,
+        'raw_response': model_raw_response
+    }
 
 def generate_html_report(results_data: Dict[str, Any], output_path: Optional[str] = None) -> str:
     """
@@ -1593,6 +2059,21 @@ def generate_html_report(results_data: Dict[str, Any], output_path: Optional[str
     
     content = '\n'.join(content_sections)
     
+    # Generate comparison JavaScript if available
+    comparison_javascript = ""
+    if COMPARISON_AVAILABLE:
+        try:
+            comparison_javascript = generate_comparison_javascript()
+        except Exception as e:
+            print(f"⚠️ Error generating comparison JavaScript: {e}")
+    
+    # Save model results for future comparison
+    if COMPARISON_AVAILABLE:
+        try:
+            save_model_results(results_data, model_name)
+        except Exception as e:
+            print(f"⚠️ Error saving model results for comparison: {e}")
+    
     # Generate final HTML
     template = get_html_template()
     html_content = template.format(
@@ -1600,7 +2081,8 @@ def generate_html_report(results_data: Dict[str, Any], output_path: Optional[str
         timestamp=timestamp,
         content=content,
         chart_data=chart_data,
-        task_chart_data=task_chart_data
+        task_chart_data=task_chart_data,
+        comparison_javascript=comparison_javascript
     )
     
     # Determine output path if not specified

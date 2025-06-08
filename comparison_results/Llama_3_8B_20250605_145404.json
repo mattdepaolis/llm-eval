@@ -1,0 +1,30 @@
+{
+  "model_name": "Llama-3-8B",
+  "timestamp": "2025-06-05T14:54:04.341551",
+  "results": {
+    "leaderboard_mmlu_pro": {
+      "acc_norm": 0.58
+    },
+    "leaderboard_gpqa_diamond": {
+      "acc_norm": 0.38
+    },
+    "leaderboard_math_algebra_hard": {
+      "exact_match": 0.28
+    },
+    "leaderboard_bbh_boolean_expressions": {
+      "acc_norm": 0.68
+    },
+    "leaderboard_musr_murder_mysteries": {
+      "acc_norm": 0.48
+    }
+  },
+  "config": {
+    "model": "llama-3-8b"
+  },
+  "model_info": {
+    "name": "Llama-3-8B",
+    "type": "LLM",
+    "architecture": "Transformer",
+    "size": "Unknown"
+  }
+}

@@ -242,9 +242,12 @@ def quick_html_report(model_name: str, tasks: str = "arc_easy", model_type: str 
     # Convert limit to num_samples if provided
     if limit is not None:
         kwargs['num_samples'] = limit
+    # Pass output_dir to the evaluator so JSON files are saved in the same directory
+    kwargs['output_dir'] = output_dir
     
     # Run evaluation - properly unpack the tuple
-    results, eval_output_path = evaluate_model(
+    print("🔍 DEBUG: About to call evaluate_model with output_dir:", kwargs.get("output_dir"))
+    results, json_output_path = evaluate_model(
         model_type=model_type,
         model_name=model_name,
         tasks=tasks.split(",") if isinstance(tasks, str) else tasks,
@@ -256,6 +259,9 @@ def quick_html_report(model_name: str, tasks: str = "arc_easy", model_type: str 
     model_safe_name = model_name.replace("/", "_").replace(":", "_")
     output_path = os.path.join(output_dir, f"{model_safe_name}_evaluation_report.html")
     html_path = generate_html_report(results, output_path)
+
+    print(f"📄 JSON results: {json_output_path}")
+    print(f"📊 HTML report: {html_path}")
     
     return results, html_path
 

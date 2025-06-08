@@ -1,0 +1,30 @@
+{
+  "model_name": "GPT-3.5-Turbo",
+  "timestamp": "2025-06-07T14:54:04.341354",
+  "results": {
+    "leaderboard_mmlu_pro": {
+      "acc_norm": 0.65
+    },
+    "leaderboard_gpqa_diamond": {
+      "acc_norm": 0.45
+    },
+    "leaderboard_math_algebra_hard": {
+      "exact_match": 0.35
+    },
+    "leaderboard_bbh_boolean_expressions": {
+      "acc_norm": 0.75
+    },
+    "leaderboard_musr_murder_mysteries": {
+      "acc_norm": 0.55
+    }
+  },
+  "config": {
+    "model": "gpt-3.5-turbo"
+  },
+  "model_info": {
+    "name": "GPT-3.5-Turbo",
+    "type": "LLM",
+    "architecture": "Transformer",
+    "size": "Unknown"
+  }
+}

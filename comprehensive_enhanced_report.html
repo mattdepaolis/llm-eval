@@ -1,0 +1,4101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Evaluation Report - Qwen/Qwen2.5-7B-Instruct</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .header .meta {
+            text-align: right;
+        }
+
+        .header .meta div {
+            margin-bottom: 0.5rem;
+        }
+
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .config-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .config-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .config-body {
+            padding: 0;
+        }
+
+        .compact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .compact-table th,
+        .compact-table td {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .compact-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-primary);
+            width: 40%;
+        }
+
+        .compact-table td {
+            color: var(--text-secondary);
+        }
+
+        .compact-table tr:last-child th,
+        .compact-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .compact-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        @media (max-width: 768px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--card-background), #f1f5f9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .performance-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        .badge-excellent {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-good {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-needs-improvement {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-excellent {
+            background: linear-gradient(90deg, var(--success-color), #34d399);
+        }
+
+        .progress-good {
+            background: linear-gradient(90deg, var(--warning-color), #fbbf24);
+        }
+
+        .progress-poor {
+            background: linear-gradient(90deg, var(--danger-color), #f87171);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-background);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-primary);
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1rem 0;
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .sample-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .sample-header {
+            background-color: #f8fafc;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sample-content {
+            padding: 1rem;
+        }
+
+        .correct {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .incorrect {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .footer {
+            background-color: var(--card-background);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0;
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header-content {
+                text-align: center;
+            }
+            
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Choice and Answer Styling */
+        .choice-list {
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .choice-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background);
+            transition: all 0.2s;
+        }
+
+        .choice-item:last-child {
+            border-bottom: none;
+        }
+
+        .choice-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .choice-correct {
+            background-color: #f0fdf4 !important;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .choice-correct-selected {
+            background-color: #dcfce7 !important;
+            border-left: 4px solid var(--success-color);
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
+        }
+
+        .choice-incorrect-selected {
+            background-color: #fef2f2 !important;
+            border-left: 4px solid var(--danger-color);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+        }
+
+        .answer-highlight {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 2px solid;
+            font-weight: 500;
+        }
+
+        .correct-answer {
+            background-color: #f0fdf4;
+            border-color: var(--success-color);
+            color: #166534;
+        }
+
+        .correct-response {
+            background-color: #f0fdf4;
+            border-color: var(--success-color);
+            color: #166534;
+        }
+
+        .incorrect-response {
+            background-color: #fef2f2;
+            border-color: var(--danger-color);
+            color: #991b1b;
+        }
+
+        .context-block {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            font-style: italic;
+        }
+
+        .activity-label {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ZENO-Style Professional Sample Analysis */
+        .zeno-sample-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .zeno-sample-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .zeno-sample-card.correct {
+            border-left: 5px solid var(--success-color);
+        }
+
+        .zeno-sample-card.incorrect {
+            border-left: 5px solid var(--danger-color);
+        }
+
+        .zeno-sample-header {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sample-status {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .sample-task {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .zeno-sample-content {
+            padding: 1.5rem;
+        }
+
+        .narrative-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .narrative-text {
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: Georgia, serif;
+        }
+
+        .question-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-label {
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .question-text {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .activity-badge {
+            background: linear-gradient(135deg, var(--accent-color), #f59e0b);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+        }
+
+        .choices-section {
+            margin: 1.5rem 0;
+        }
+
+        .zeno-choice-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .zeno-choice-option {
+            background: var(--card-background);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .zeno-choice-option:hover {
+            border-color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .zeno-choice-option.choice-correct {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: var(--success-color);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+        }
+
+        .zeno-choice-option.choice-selected {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .zeno-choice-option.choice-correct.choice-selected {
+            background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+            border-color: var(--success-color);
+            box-shadow: 0 0 16px rgba(34, 197, 94, 0.3);
+        }
+
+        .choice-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .choice-text {
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .choice-indicators {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .direct-answer-note {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #92400e;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Enhanced Response Section Styles */
+        .response-section {
+            margin: 1.5rem 0;
+        }
+
+        .model-response {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .model-response.response-correct {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+
+        .model-response.response-incorrect {
+            border-color: var(--danger-color);
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        }
+
+        .response-header {
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .response-icon {
+            font-size: 1.1rem;
+        }
+
+        .response-status {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .response-content {
+            padding: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Correct Answer Section Styles */
+        .correct-answer-section {
+            margin: 1.5rem 0;
+        }
+
+        .correct-answer {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid var(--success-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .answer-content {
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        /* Confidence Section Styles */
+        .confidence-section {
+            margin: 1.5rem 0;
+        }
+
+        .confidence-scores {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .confidence-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .confidence-item:last-child {
+            border-bottom: none;
+        }
+
+        .confidence-item.selected-confidence {
+            background: rgba(37, 99, 235, 0.1);
+            margin: 0 -0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .conf-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .conf-score {
+            font-family: 'Courier New', monospace;
+            background: #f8fafc;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .result-item {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .result-item.correct-result {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+
+        .result-item.incorrect-result {
+            border-color: var(--danger-color);
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        }
+
+        .result-item.raw-result {
+            border-color: var(--text-secondary);
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }
+
+        .result-header {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-icon {
+            font-size: 1.2rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .result-content {
+            padding: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .raw-content {
+            font-family: 'Monaco', 'Consolas', monospace;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .confidence-scores {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .confidence-scores h5 {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .confidence-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            background: var(--card-background);
+            border: 1px solid transparent;
+        }
+
+        .confidence-item.selected-confidence {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .conf-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .conf-score {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .more-samples-note {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        /* Legacy support for old styles */
+        .sample-card {
+            /* Keep for backward compatibility */
+        }
+
+        .sample-header {
+            /* Keep for backward compatibility */
+        }
+
+        .sample-content {
+            /* Keep for backward compatibility */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>🧠 LLM Evaluation Report</h1>
+                    <div class="subtitle">Model: Qwen/Qwen2.5-7B-Instruct</div>
+                </div>
+                <div class="meta">
+                    <div>📅 Generated: 2025-06-08 16:31:54</div>
+                    <div>⚡ Framework: Professional LLM Eval</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+<h2>📋 Executive Summary</h2>
+<div class="grid grid-3">
+
+            <div class="metric-card">
+                <div class="metric-value" style="color: var(--primary-color);">61.5%</div>
+                <div class="metric-label">Average Score</div>
+                
+    <div class="progress-bar">
+        <div class="progress-fill progress-good" style="width: 61.5%"></div>
+    </div>
+    
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" style="color: var(--success-color);">100.0%</div>
+                <div class="metric-label">Best Performance</div>
+                
+    <div class="progress-bar">
+        <div class="progress-fill progress-excellent" style="width: 100.0%"></div>
+    </div>
+    
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" style="color: var(--warning-color);">0.0%</div>
+                <div class="metric-label">Lowest Performance</div>
+                
+    <div class="progress-bar">
+        <div class="progress-fill progress-poor" style="width: 0.0%"></div>
+    </div>
+    
+            </div>
+            
+</div>
+<div style="text-align: center; margin: 1.5rem 0;"><span class="performance-badge badge-good">🟡 GOOD</span></div>
+<h3>🔍 Key Insights</h3>
+<ul>
+<li>⚡ <strong>Moderate performance</strong> with room for improvement</li>
+<li>📊 <strong>High variance</strong> in task performance - model may excel in specific domains</li>
+<li>🏆 <strong>Best task:</strong> leaderboard_bbh_boolean_expressions (100.0%)</li>
+<li>🔄 <strong>Improvement opportunity:</strong> leaderboard_bbh_causal_judgement (0.0%)</li>
+</ul>
+</div>
+<div class="card">
+<h2>⚙️ Model Configuration</h2>
+<div class="config-grid">
+<div class="config-card">
+<div class="config-header">🔧 Basic Model Information</div>
+<div class="config-body">
+<table class="compact-table">
+<tr><th>Model Name</th><td>Qwen/Qwen2.5-7B-Instruct</td></tr>
+<tr><th>Architecture</th><td>Qwen (Transformer)</td></tr>
+<tr><th>Parameters</th><td>~7 billion</td></tr>
+<tr><th>Context Length</th><td>32,768 tokens</td></tr>
+<tr><th>Backend</th><td>HF</td></tr>
+<tr><th>Data Type</th><td>Not specified</td></tr>
+<tr><th>Quantization</th><td>None</td></tr>
+<tr><th>Revision</th><td>main</td></tr>
+</table>
+</div>
+</div>
+<div class="config-card">
+<div class="config-header">🖥️ Hardware & Performance Configuration</div>
+<div class="config-body">
+<table class="compact-table">
+<tr><th>Device Mapping</th><td>Single GPU</td></tr>
+<tr><th>Tensor Parallel Size</th><td>1</td></tr>
+<tr><th>Pipeline Parallel Size</th><td>1</td></tr>
+<tr><th>GPU Memory Utilization</th><td>Not specified</td></tr>
+<tr><th>Max Model Length</th><td>Not specified</td></tr>
+<tr><th>Trust Remote Code</th><td>False</td></tr>
+<tr><th>Evaluation Device</th><td>cuda:1</td></tr>
+<tr><th>Batch Size</th><td>1</td></tr>
+</table>
+</div>
+</div>
+<div class="config-card">
+<div class="config-header">⚡ Advanced Features & Optimization</div>
+<div class="config-body">
+<table class="compact-table">
+<tr><th>Attention Implementation</th><td>Not specified</td></tr>
+<tr><th>Flash Attention</th><td>Not specified</td></tr>
+<tr><th>Low CPU Memory Usage</th><td>Not specified</td></tr>
+<tr><th>Use Cache</th><td>Not specified</td></tr>
+<tr><th>Cache Directory</th><td>Not specified</td></tr>
+<tr><th>Offload Folder</th><td>Not specified</td></tr>
+<tr><th>PEFT Configuration</th><td>None</td></tr>
+<tr><th>LoRA Configuration</th><td>None</td></tr>
+</table>
+</div>
+</div>
+<div class="config-card">
+<div class="config-header">🎯 Generation Parameters</div>
+<div class="config-body">
+<table class="compact-table">
+<tr><th>Temperature</th><td>Not specified</td></tr>
+<tr><th>Top P</th><td>Not specified</td></tr>
+<tr><th>Top K</th><td>Not specified</td></tr>
+<tr><th>Max Tokens</th><td>Not specified</td></tr>
+<tr><th>Max New Tokens</th><td>Not specified</td></tr>
+<tr><th>Do Sample</th><td>Not specified</td></tr>
+<tr><th>Num Beams</th><td>Not specified</td></tr>
+<tr><th>Repetition Penalty</th><td>Not specified</td></tr>
+<tr><th>Length Penalty</th><td>Not specified</td></tr>
+<tr><th>Early Stopping</th><td>Not specified</td></tr>
+</table>
+</div>
+</div>
+<div class="config-card">
+<div class="config-header">📋 Evaluation Configuration</div>
+<div class="config-body">
+<table class="compact-table">
+<tr><th>Evaluated Tasks</th><td>Not specified</td></tr>
+<tr><th>Number of Few-shot Examples</th><td>Not specified</td></tr>
+<tr><th>Samples Per Task</th><td>1</td></tr>
+<tr><th>Evaluation Framework</th><td>lm-evaluation-harness</td></tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>📊 Task Performance Results</h2>
+<div class="chart-container">
+<canvas id="taskChart"></canvas>
+</div>
+<div class="chart-container">
+<canvas id="performanceChart"></canvas>
+</div>
+<h3>📋 Detailed Results</h3>
+<div class="table-container">
+<table>
+<thead><tr><th>Task</th><th>Metric</th><th>Score</th><th>Performance</th></tr></thead>
+<tbody>
+<tr><td>leaderboard_bbh_boolean_expressions</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_causal_judgement</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_date_understanding</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_disambiguation_qa</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_formal_fallacies</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_geometric_shapes</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_hyperbaton</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_logical_deduction_five_objects</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_logical_deduction_seven_objects</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_logical_deduction_three_objects</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_movie_recommendation</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_navigate</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_object_counting</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_penguins_in_a_table</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_reasoning_about_colored_objects</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_ruin_names</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_salient_translation_error_detection</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_snarks</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_sports_understanding</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_temporal_sequences</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_bbh_tracking_shuffled_objects_five_objects</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_tracking_shuffled_objects_seven_objects</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_tracking_shuffled_objects_three_objects</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_bbh_web_of_lies</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_gpqa_diamond</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_gpqa_extended</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_gpqa_main</td><td>acc_norm,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_ifeval</td><td>prompt_level_strict_acc,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td></td><td>inst_level_strict_acc,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td></td><td>prompt_level_loose_acc,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td></td><td>inst_level_loose_acc,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_math_algebra_hard</td><td>exact_match,none</td><td>1.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_math_counting_and_prob_hard</td><td>exact_match,none</td><td>1.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_math_geometry_hard</td><td>exact_match,none</td><td>1.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_math_intermediate_algebra_hard</td><td>exact_match,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_math_num_theory_hard</td><td>exact_match,none</td><td>1.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_math_prealgebra_hard</td><td>exact_match,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_math_precalculus_hard</td><td>exact_match,none</td><td>0.00%</td><td><span class="performance-badge badge-needs-improvement">🔴 NEEDS IMPROVEMENT</span></td></tr>
+<tr><td>leaderboard_mmlu_pro</td><td>acc,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_musr_murder_mysteries</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_musr_object_placements</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+<tr><td>leaderboard_musr_team_allocation</td><td>acc_norm,none</td><td>100.00%</td><td><span class="performance-badge badge-excellent">🟢 EXCELLENT</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<h2>🔍 Sample Analysis</h2>
+<div class="tabs">
+<button class="tab active" data-tab="task-0">Mmlu Pro</button>
+<button class="tab " data-tab="task-1">Bbh Boolean Expressions</button>
+<button class="tab " data-tab="task-2">Bbh Causal Judgement</button>
+<button class="tab " data-tab="task-3">Bbh Date Understanding</button>
+<button class="tab " data-tab="task-4">Bbh Disambiguation Qa</button>
+<button class="tab " data-tab="task-5">Bbh Formal Fallacies</button>
+<button class="tab " data-tab="task-6">Bbh Geometric Shapes</button>
+<button class="tab " data-tab="task-7">Bbh Hyperbaton</button>
+<button class="tab " data-tab="task-8">Bbh Logical Deduction Five Objects</button>
+<button class="tab " data-tab="task-9">Bbh Logical Deduction Seven Objects</button>
+<button class="tab " data-tab="task-10">Bbh Logical Deduction Three Objects</button>
+<button class="tab " data-tab="task-11">Bbh Movie Recommendation</button>
+<button class="tab " data-tab="task-12">Bbh Navigate</button>
+<button class="tab " data-tab="task-13">Bbh Object Counting</button>
+<button class="tab " data-tab="task-14">Bbh Penguins In A Table</button>
+<button class="tab " data-tab="task-15">Bbh Reasoning About Colored Objects</button>
+<button class="tab " data-tab="task-16">Bbh Ruin Names</button>
+<button class="tab " data-tab="task-17">Bbh Salient Translation Error Detection</button>
+<button class="tab " data-tab="task-18">Bbh Snarks</button>
+<button class="tab " data-tab="task-19">Bbh Sports Understanding</button>
+<button class="tab " data-tab="task-20">Bbh Temporal Sequences</button>
+<button class="tab " data-tab="task-21">Bbh Tracking Shuffled Objects Five Objects</button>
+<button class="tab " data-tab="task-22">Bbh Tracking Shuffled Objects Seven Objects</button>
+<button class="tab " data-tab="task-23">Bbh Tracking Shuffled Objects Three Objects</button>
+<button class="tab " data-tab="task-24">Bbh Web Of Lies</button>
+<button class="tab " data-tab="task-25">Gpqa Diamond</button>
+<button class="tab " data-tab="task-26">Gpqa Extended</button>
+<button class="tab " data-tab="task-27">Gpqa Main</button>
+<button class="tab " data-tab="task-28">Math Algebra Hard</button>
+<button class="tab " data-tab="task-29">Math Counting And Prob Hard</button>
+<button class="tab " data-tab="task-30">Math Geometry Hard</button>
+<button class="tab " data-tab="task-31">Math Intermediate Algebra Hard</button>
+<button class="tab " data-tab="task-32">Math Num Theory Hard</button>
+<button class="tab " data-tab="task-33">Math Prealgebra Hard</button>
+<button class="tab " data-tab="task-34">Math Precalculus Hard</button>
+<button class="tab " data-tab="task-35">Ifeval</button>
+<button class="tab " data-tab="task-36">Musr Murder Mysteries</button>
+<button class="tab " data-tab="task-37">Musr Object Placements</button>
+<button class="tab " data-tab="task-38">Musr Team Allocation</button>
+</div>
+<div id="task-0" class="tab-content active">
+<div class="zeno-sample-card correct">
+<div class="zeno-sample-header">
+<span class="sample-status">✅ Sample 1</span>
+<span class="sample-task">MMLU_PRO</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Typical advertising regulatory bodies suggest, for example that adverts must not: encourage _________, cause unnecessary ________ or _____, and must not cause _______ offence.</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Safe practices, Fear, Jealousy, Trivial</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">Unsafe practices, Distress, Joy, Trivial</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">Safe practices, Wants, Jealousy, Trivial</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">Safe practices, Distress, Fear, Trivial</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">Unsafe practices, Wants, Jealousy, Serious</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">Safe practices, Distress, Jealousy, Serious</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">G</div>
+<div class="choice-text">Safe practices, Wants, Fear, Serious</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">H</div>
+<div class="choice-text">Unsafe practices, Wants, Fear, Trivial</div>
+</div>
+<div class="zeno-choice-option choice-correct choice-selected">
+<div class="choice-label">I</div>
+<div class="choice-text">Unsafe practices, Distress, Fear, Serious</div>
+<div class="choice-indicators">✓ Correct • 🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-correct">
+<div class="response-header">
+<span class="response-icon">✅</span>
+<span class="response-status">Correct</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> I - Unsafe practices, Distress, Fear, Serious
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> I - Unsafe practices, Distress, Fear, Serious
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-8.3125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-8.3125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-6.9375</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-4.0625</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-4.8125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-4.4375</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">G:</span>
+<span class="conf-score">-4.0625</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">H:</span>
+<span class="conf-score">-7.3125</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">I:</span>
+<span class="conf-score">-0.0593</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-1" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_BOOLEAN_EXPRESSIONS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">not ( True ) and ( True ) is</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[[-0.000652313232421875, True]], [[-8.75, False]]]
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> False - False
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-2" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_CAUSAL_JUDGEMENT</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the battery at the same time. The machine will not short circuit if just one of these wires touches the battery. The black wire is designated as the one that is supposed to touch the battery, while the red wire is supposed to remain in some other part of the machine. One day, the black wire and the red wire both end up touching the battery at the same time. There is a short circuit. Did the black wire cause the short circuit?
+Options:
+- Yes
+- No</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">A</div>
+<div class="choice-text">Yes</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option choice-correct">
+<div class="choice-label">B</div>
+<div class="choice-text">No</div>
+<div class="choice-indicators">✓ Correct</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> A - Yes
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> B - No
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">A:</span>
+<span class="conf-score">-0.0232</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-3.7656</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-3" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_DATE_UNDERSTANDING</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Today is Christmas Eve of 1937. What is the date tomorrow in MM/DD/YYYY?
+Options:
+(A) 12/11/1937
+(B) 12/25/1937
+(C) 01/04/1938
+(D) 12/04/1937
+(E) 12/25/2006
+(F) 07/25/1937</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">12/11/1937</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">12/25/1937</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">01/04/1938</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">12/04/1937</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">12/25/2006</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">07/25/1937</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - 12/25/1937
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (B) - (B)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-19.6250</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-0.2021</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-16.6250</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-17.7500</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-17.6250</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-17.3750</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-4" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_DISAMBIGUATION_QA</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The patient was referred to the specialist because he had a rare skin condition.
+Options:
+(A) The patient had a skin condition
+(B) The specialist had a skin condition
+(C) Ambiguous</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">A</div>
+<div class="choice-text">The patient had a skin condition</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">The specialist had a skin condition</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">Ambiguous</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> A - The patient had a skin condition
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">A:</span>
+<span class="conf-score">-0.7031</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-11.1250</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-7.9062</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-5" class="tab-content ">
+<div class="zeno-sample-card correct">
+<div class="zeno-sample-header">
+<span class="sample-status">✅ Sample 1</span>
+<span class="sample-task">BBH_FORMAL_FALLACIES</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">"Here comes a perfectly valid argument: First of all, whoever is a schoolmate of Sondra is not a stepsister of Pricilla. In consequence, whoever is not a stepsister of Pricilla is a schoolmate of Sondra."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">valid</div>
+</div>
+<div class="zeno-choice-option choice-correct choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">invalid</div>
+<div class="choice-indicators">✓ Correct • 🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-correct">
+<div class="response-header">
+<span class="response-icon">✅</span>
+<span class="response-status">Correct</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - invalid
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> B - invalid
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-6.5000</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-0.0023</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-6" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_GEOMETRIC_SHAPES</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">This SVG path element <path d="M 55.57,80.69 L 57.38,65.80 M 57.38,65.80 L 48.90,57.46 M 48.90,57.46 L 45.58,47.78 M 45.58,47.78 L 53.25,36.07 L 66.29,48.90 L 78.69,61.09 L 55.57,80.69"/> draws a
+Options:
+(A) circle
+(B) heptagon
+(C) hexagon
+(D) kite
+(E) line
+(F) octagon
+(G) pentagon
+(H) rectangle
+(I) sector
+(J) triangle</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">circle</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">heptagon</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">hexagon</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">kite</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">line</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">octagon</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - heptagon
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (B) - (B)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-16.7500</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-0.1270</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-16.3750</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-16.2500</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-13.4375</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-9.1250</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-7" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_HYPERBATON</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Which sentence has the correct adjective order:
+Options:
+(A) midsize old grey Brazilian sweater
+(B) midsize grey Brazilian old sweater</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">midsize old grey Brazilian sweater</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">midsize grey Brazilian old sweater</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - midsize grey Brazilian old sweater
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-3.7656</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-0.8984</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-8" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_LOGICAL_DEDUCTION_FIVE_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">The following paragraphs each describe a set of five objects arranged in a fixed order. The statements are logically consistent within each paragraph. On a branch, there are five birds: a quail, an owl, a raven, a falcon, and a robin. The owl is the leftmost. The robin is to the left of the raven. The quail is the rightmost. The raven is the third from the left.
+Options:
+(A) The quail is the rightmost
+(B) The owl is the rightmost
+(C) The raven is the rightmost
+(D) The falcon is the rightmost
+(E) The robin is the rightmost</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">A</div>
+<div class="choice-text">The quail is the rightmost</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">The owl is the rightmost</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">The raven is the rightmost</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">The falcon is the rightmost</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">The robin is the rightmost</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> A - The quail is the rightmost
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">A:</span>
+<span class="conf-score">-0.4805</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-17.8750</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-9.1250</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-16.2500</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-7.1250</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-9" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_LOGICAL_DEDUCTION_SEVEN_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">The following paragraphs each describe a set of seven objects arranged in a fixed order. The statements are logically consistent within each paragraph. In a golf tournament, there were seven golfers: Ana, Eve, Ada, Dan, Rob, Amy, and Joe. Dan finished third. Ana finished above Ada. Amy finished last. Dan finished below Rob. Eve finished below Ada. Rob finished below Joe.
+Options:
+(A) Ana finished third
+(B) Eve finished third
+(C) Ada finished third
+(D) Dan finished third
+(E) Rob finished third
+(F) Amy finished third
+(G) Joe finished third</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Ana finished third</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">Eve finished third</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">Ada finished third</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">D</div>
+<div class="choice-text">Dan finished third</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">Rob finished third</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">Amy finished third</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> D - Dan finished third
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (D) - (D)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-16.0000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-21.5000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-12.5625</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">D:</span>
+<span class="conf-score">-0.8281</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-10.7500</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-20.5000</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-10" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_LOGICAL_DEDUCTION_THREE_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. On a branch, there are three birds: a blue jay, a quail, and a falcon. The falcon is to the right of the blue jay. The blue jay is to the right of the quail.
+Options:
+(A) The blue jay is the second from the left
+(B) The quail is the second from the left
+(C) The falcon is the second from the left</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">A</div>
+<div class="choice-text">The blue jay is the second from the left</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">The quail is the second from the left</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">The falcon is the second from the left</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> A - The blue jay is the second from the left
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">A:</span>
+<span class="conf-score">-0.1699</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-7.0625</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-7.4375</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-11" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_MOVIE_RECOMMENDATION</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Find a movie similar to Batman, The Mask, The Fugitive, Pretty Woman:
+Options:
+(A) The Front Page
+(B) Maelstrom
+(C) The Lion King
+(D) Lamerica</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">The Front Page</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">Maelstrom</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">The Lion King</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">D</div>
+<div class="choice-text">Lamerica</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> D - Lamerica
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (C) - (C)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-4.5625</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-5.7500</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-3.3906</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">D:</span>
+<span class="conf-score">-3.3125</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-12" class="tab-content ">
+<div class="zeno-sample-card correct">
+<div class="zeno-sample-header">
+<span class="sample-status">✅ Sample 1</span>
+<span class="sample-task">BBH_NAVIGATE</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">If you follow these instructions, do you return to the starting point? Always face forward. Take 1 step backward. Take 9 steps left. Take 2 steps backward. Take 6 steps forward. Take 4 steps forward. Take 4 steps backward. Take 3 steps right.
+Options:
+- Yes
+- No</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Yes</div>
+</div>
+<div class="zeno-choice-option choice-correct choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">No</div>
+<div class="choice-indicators">✓ Correct • 🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-correct">
+<div class="response-header">
+<span class="response-icon">✅</span>
+<span class="response-status">Correct</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - No
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> B - No
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-5.0000</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-0.0076</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-13" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_OBJECT_COUNTING</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">I have a flute, a piano, a trombone, four stoves, a violin, an accordion, a clarinet, a drum, two lamps, and a trumpet. How many musical instruments do I have?</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[[-14.9375, False]], [[-5.65625, False]], [[-13.5, False]], [[-11.0625, False]], [[-7.40625, False]], [[-4.03125, False]], [[-1.2890625, False]], [[-0.79296875, True]], [[-1.5390625, False]], [[-3.29...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 8 - 8
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-14" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_PENGUINS_IN_A_TABLE</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Here is a table where the first line is a header and each subsequent line is a penguin:  name, age, height (cm), weight (kg) Louis, 7, 50, 11 Bernard, 5, 80, 13 Vincent, 9, 60, 11 Gwen, 8, 70, 15  For example: the age of Louis is 7, the weight of Gwen is 15 kg, the height of Bernard is 80 cm.  We now add a penguin to the table:
+James, 12, 90, 12
+And here is a similar table, but listing giraffes:
+name, age, height (cm), weight (kg)
+Jody, 5, 430, 620
+Gladys, 10, 420, 590
+Marian, 2, 310, 410
+Donna, 9, 440, 650
+Which is the oldest penguin?
+Options:
+(A) Louis
+(B) Bernard
+(C) Vincent
+(D) Gwen
+(E) James</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Louis</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">Bernard</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">Vincent</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">D</div>
+<div class="choice-text">Gwen</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">James</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> D - Gwen
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (E) - (E)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-11.9375</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-10.1875</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-2.0625</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">D:</span>
+<span class="conf-score">-0.1914</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-5.3750</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-15" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_REASONING_ABOUT_COLORED_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">On the floor, there is one mauve cat toy, two purple cat toys, three grey cat toys, two mauve notebooks, three grey notebooks, three burgundy cat toys, and one purple notebook. If I remove all the notebooks from the floor, how many grey objects remain on it?
+Options:
+(A) zero
+(B) one
+(C) two
+(D) three
+(E) four
+(F) five
+(G) six
+(H) seven
+(I) eight
+(J) nine
+(K) ten
+(L) eleven
+(M) twelve
+(N) thirteen
+(O) fourteen
+(P) fifteen
+(Q) sixteen</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">zero</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">one</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">C</div>
+<div class="choice-text">two</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">three</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">four</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">five</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> C - two
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (D) - (D)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-10.8125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-6.7500</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">C:</span>
+<span class="conf-score">-0.7070</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-6.7812</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-7.8438</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-6.5938</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-16" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_RUIN_NAMES</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Which of the following is a humorous edit of this artist or movie name: 'rain man'?
+Options:
+(A) ruin man
+(B) rains man
+(C) rain men
+(D) rainmman</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">A</div>
+<div class="choice-text">ruin man</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">rains man</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">rain men</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">rainmman</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> A - ruin man
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">A:</span>
+<span class="conf-score">-0.0574</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-11.5625</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-11.3750</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-9.3125</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-17" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_SALIENT_TRANSLATION_ERROR_DETECTION</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">The following translations from German to English contain a particular error. That error will be one of the following types: Named Entities: An entity (names, places, locations, etc.) is changed to a different entity. Numerical Values: Numerical values (ordinals or cardinals), dates, and/or units are changed. Modifiers or Adjectives: The modifiers and adjectives pertaining to a noun are changed. Negation or Antonyms: Introduce or remove a negation or change comparatives to their antonyms. Facts: Trivial factual errors not pertaining to the above classes are introduced in the translations. Dropped Content: A significant clause in the translation is removed. Please identify that error.  Source: Karl Borromäus Joseph Fürst von Liechtenstein war ein kaiserlicher Feldmarschall.
+Translation: Charles Borromeo Joseph Prince of Liechtenstein was an judicial field marshal.
+The translation contains an error pertaining to
+Options:
+(A) Modifiers or Adjectives
+(B) Numerical Values
+(C) Negation or Antonyms
+(D) Named Entities
+(E) Dropped Content
+(F) Facts</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Modifiers or Adjectives</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">Numerical Values</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">Negation or Antonyms</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">D</div>
+<div class="choice-text">Named Entities</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">Dropped Content</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">Facts</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> D - Named Entities
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-2.4531</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-11.2500</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-14.2500</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">D:</span>
+<span class="conf-score">-0.8398</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-8.4375</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-12.3125</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-18" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_SNARKS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Which statement is sarcastic?
+Options:
+(A) He's a generous person, trying to promote a charity stream that has raised millions to help kids in need
+(B) He's a terrible person, trying to promote a charity stream that has raised millions to help kids in need</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">He's a generous person, trying to promote a charity stream that has raised millions to help kids in need</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">He's a terrible person, trying to promote a charity stream that has raised millions to help kids in need</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - He's a terrible person, trying to promote a charity stream that has raised millions to help kids in need
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (B) - (B)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-10.7500</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-1.7109</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-19" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_SPORTS_UNDERSTANDING</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Is the following sentence plausible? "Elias Lindholm beat the buzzer."</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[[-6.875, False]], [[-0.0047607421875, True]]]
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> no - no
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-20" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_TEMPORAL_SEQUENCES</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Today, Susan went to the coffee shop. Between what times could they have gone?
+We know that:
+Susan woke up at 7am.
+Linda saw Susan driving to the water park from 7am to 11am.
+John saw Susan buying clothes at the mall from 11am to 12pm.
+Jessica saw Susan taking photos near the Eiffel Tower from 12pm to 1pm.
+Steven saw Susan buying lunch at the deli from 1pm to 2pm.
+Thomas saw Susan reading at the library from 2pm to 6pm.
+The coffee shop was closed after 9pm.
+Between what times could Susan have gone to the coffee shop?
+Options:
+(A) 6pm to 9pm
+(B) 7am to 11am
+(C) 1pm to 2pm
+(D) 2pm to 6pm</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">A</div>
+<div class="choice-text">6pm to 9pm</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">7am to 11am</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">1pm to 2pm</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">2pm to 6pm</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> A - 6pm to 9pm
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">A:</span>
+<span class="conf-score">-0.9336</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-5.5000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-0.9336</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-3.9219</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-21" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_TRACKING_SHUFFLED_OBJECTS_FIVE_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Alice, Bob, Claire, Dave, and Eve are dancers at a square dance. At the start of a song, they each have a partner: Alice is dancing with Patrick, Bob is dancing with Sam, Claire is dancing with Jamie, Dave is dancing with Lola, and Eve is dancing with Melissa.
+Throughout the song, the dancers often trade partners. First, Dave and Eve switch partners. Then, Dave and Alice switch partners. Then, Eve and Alice switch partners. Then, Claire and Bob switch partners. Finally, Dave and Alice switch partners. At the end of the dance, Alice is dancing with
+Options:
+(A) Patrick
+(B) Sam
+(C) Jamie
+(D) Lola
+(E) Melissa</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Patrick</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">Sam</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">Jamie</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">Lola</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">Melissa</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - Sam
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-12.0625</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-0.7031</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-6.9688</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-2.1875</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-6.9688</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-22" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_TRACKING_SHUFFLED_OBJECTS_SEVEN_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Alice, Bob, Claire, Dave, Eve, Fred, and Gertrude are on the same team in a soccer match. At the start of the match, they are each assigned to a position: Alice is playing striker, Bob is playing right winger, Claire is playing left winger, Dave is playing benchwarmer, Eve is playing goalkeeper, Fred is playing center midfielder, and Gertrude is playing cheerleader.
+As the game progresses, pairs of players occasionally swap positions. First, Eve and Claire trade positions. Then, Gertrude and Alice trade positions. Then, Fred and Bob trade positions. Then, Dave and Fred trade positions. Then, Fred and Bob trade positions. Then, Bob and Eve trade positions. Finally, Claire and Alice trade positions. At the end of the match, Gertrude is playing
+Options:
+(A) striker
+(B) right winger
+(C) left winger
+(D) benchwarmer
+(E) goalkeeper
+(F) center midfielder
+(G) cheerleader</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">striker</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">right winger</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">left winger</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">benchwarmer</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">E</div>
+<div class="choice-text">goalkeeper</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">F</div>
+<div class="choice-text">center midfielder</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[[-12.6875, False]], [[-6.59375, False]], [[-9.6875, False]], [[-6.8125, False]], [[-10.4375, False]], [[-1.390625, False]], [[-0.51953125, True]]]
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (A) - (A)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-12.6875</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-6.5938</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-9.6875</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-6.8125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">E:</span>
+<span class="conf-score">-10.4375</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">F:</span>
+<span class="conf-score">-1.3906</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-23" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_TRACKING_SHUFFLED_OBJECTS_THREE_OBJECTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Alice, Bob, and Claire are friends and avid readers who occasionally trade books. At the start of the semester, they each buy one new book: Alice gets Ulysses, Bob gets Frankenstein, and Claire gets Lolita.
+As the semester proceeds, they start trading around the new books. First, Claire and Bob swap books. Then, Bob and Alice swap books. Finally, Claire and Bob swap books. At the end of the semester, Bob has
+Options:
+(A) Ulysses
+(B) Frankenstein
+(C) Lolita</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">Ulysses</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">Frankenstein</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">C</div>
+<div class="choice-text">Lolita</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> C - Lolita
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (B) - (B)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-8.3750</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-5.1250</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">C:</span>
+<span class="conf-score">-0.1562</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-24" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">BBH_WEB_OF_LIES</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Question: Sherrie tells the truth. Vernell says Sherrie tells the truth. Alexis says Vernell lies. Michaela says Alexis tells the truth. Elanor says Michaela tells the truth. Does Elanor tell the truth?</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[[-0.16015625, True]], [[-1.9140625, False]]]
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> No - No
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-25" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">GPQA_DIAMOND</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Two quantum states with energies E1 and E2 have a lifetime of 10^-9 sec and 10^-8 sec, respectively. We want to clearly distinguish these two energy levels. Which one of the following options could be their energy difference so that they can be clearly resolved?
+</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">10^-9 eV</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">B</div>
+<div class="choice-text">10^-4 eV</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">C</div>
+<div class="choice-text">10^-8 eV</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">10^-11 eV</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> B - 10^-4 eV
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (B) - (B)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-8.6250</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">B:</span>
+<span class="conf-score">-5.0000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">C:</span>
+<span class="conf-score">-8.3125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-7.4062</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-26" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">GPQA_EXTENDED</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">A large gene has dozens of exons, of which the central ones code for folded triple helical repeats that connect the cytoskeleton with sarcolemma and extracellular space. Each exon usually codes for one folded triple alpha helix. The most common mutations of the gene are central exon deletions that create out-of-frame peptides and progressive degenerative organ waste. A solution is to deliver a Morpholino that recognizes the 5' end of the out-of-frame exon in pre-mRNA. The molecule prevents binding of the spliceosome and creates exon skipping and in-frame joining. Several missing exons are well tolerated by an organism. Which structure below is not involved in the proposed therapy?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">antisense</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">polyA tail</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">C</div>
+<div class="choice-text">R-loops</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">lariat</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> C - R-loops
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (C) - (C)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-18.8750</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-18.5000</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">C:</span>
+<span class="conf-score">-12.6250</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-21.1250</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-27" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">GPQA_MAIN</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">A large gene has dozens of exons, of which the central ones code for folded triple helical repeats that connect the cytoskeleton with sarcolemma and extracellular space. Each exon usually codes for one folded triple alpha helix. The most common mutations of the gene are central exon deletions that create out-of-frame peptides and progressive degenerative organ waste. A solution is to deliver a Morpholino that recognizes the 5' end of the out-of-frame exon in pre-mRNA. The molecule prevents binding of the spliceosome and creates exon skipping and in-frame joining. Several missing exons are well tolerated by an organism. Which structure below is not involved in the proposed therapy?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">A</div>
+<div class="choice-text">antisense</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">B</div>
+<div class="choice-text">lariat</div>
+</div>
+<div class="zeno-choice-option choice-selected">
+<div class="choice-label">C</div>
+<div class="choice-text">polyA tail</div>
+<div class="choice-indicators">🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">D</div>
+<div class="choice-text">R-loops</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> C - polyA tail
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> (D) - (D)
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">A:</span>
+<span class="conf-score">-18.5000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">B:</span>
+<span class="conf-score">-20.2500</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">C:</span>
+<span class="conf-score">-12.5000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">D:</span>
+<span class="conf-score">-15.6875</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-28" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_ALGEBRA_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">How many vertical asymptotes does the graph of $y=\frac{2}{x^2+x-6}$ have?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[' To find the vertical asymptotes, we need to determine where the denominator is equal to zero. Factoring the denominator, we get $x^2 + x - 6 = (x+3)(x-2)$. Setting each factor equal to zero, we fi...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 2 - 2
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-29" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_COUNTING_AND_PROB_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">The probability of rain tomorrow is $\frac{1}{11}$.  What is the probability that it will not rain tomorrow?  Express your answer as a common fraction.</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[' The probability that it will not rain is simply $1$ minus the probability that it will rain.  Thus, the probability that it will not rain is $1 - \\frac{1}{11} = \\boxed{\\frac{10}{11}}$.\nFinal A...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> \frac{10}{11} - \frac{10}{11}
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-30" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_GEOMETRY_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">In right triangle $ABC$, shown below, $\cos{B}=\frac{6}{10}$.  What is $\tan{C}$?
+
+[asy]
+draw((0,0)--(10,0)--(3.6,4.8)--cycle,black+linewidth(1));
+draw(rightanglemark((0,0),(3.6,4.8),(10,0),20),black+linewidth(1));
+label("$C$",(10,0),E);
+label("$A$",(3.6,4.8),N);
+label("$B$",(0,0),W);
+label("10",(0,0)--(10,0),S);
+[/asy]</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[" Since $\\cos B = \\frac{6}{10}$, we know that the adjacent side to angle $B$ is 6 and the hypotenuse is 10. By the Pythagorean theorem, the length of the opposite side to angle $B$ (which is the s...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> \frac{3}{4} - \frac{3}{4}
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-31" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_INTERMEDIATE_ALGEBRA_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Suppose that $x,$ $y,$ and $z$ are complex numbers such that \[\begin{aligned} xy &= -80 - 320i, \\ yz &=60, \\ zx &= -96 + 24i, \end{aligned}\]where $i^2 = -1.$ Compute $|x+y+z|.$</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[" To find $|x+y+z|$, we need to determine the values of $x$, $y$, and $z$. From the given equations, we can express $x$, $y$, and $z$ in terms of each other. First, we multiply all three equations t...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> \sqrt{74} - \sqrt{74}
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-32" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_NUM_THEORY_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">A positive multiple of 45 less than 1000 is randomly selected. What is the probability that it is a two-digit integer? Express your answer as a common fraction.</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[" A positive multiple of 45 less than 1000 can be written in the form $45k$, where $k$ is a positive integer. We need to find the range of $k$ such that $45k < 1000$. Solving for $k$, we get:\n\n\\[...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> \frac{1}{11} - \frac{1}{11}
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-33" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_PREALGEBRA_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">John and Gary are playing a game. John spins a spinner numbered with integers from 1 to 20. Gary then writes a list of all of the positive factors of the number spun except for the number itself. Gary then creates a new spinner with all of the numbers on his list. John then spins this spinner, and the process continues. The game is over when the spinner has no numbers on it. If John spins a 20 on his first spin, what is the maximum number of total spins (including the one he already made) that John can make before the game is over?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[" If John spins a 20, the factors of 20 are 1, 2, 4, 5, 10, and 20. Excluding 20, the remaining factors are 1, 2, 4, 5, and 10. These numbers form the set for the new spinner. The next spin could re...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 4 - 4
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-34" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">MATH_PRECALCULUS_HARD</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Let $\mathbf{a}$ and $\mathbf{b}$ be vectors such that
+\[\mathbf{v} = \operatorname{proj}_{\mathbf{a}} \mathbf{v} + \operatorname{proj}_{\mathbf{b}} \mathbf{v}\]for all vectors $\mathbf{v}.$  Enter all possible values of $\mathbf{a} \cdot \mathbf{b},$ separated by commas.</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Mathematical Expression) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[' Since the projection formula is $\\operatorname{proj}_{\\mathbf{u}} \\mathbf{v} = \\frac{\\mathbf{u} \\cdot \\mathbf{v}}{\\|\\mathbf{u}\\|^2} \\mathbf{u},$ we have\n\\begin{align*}\n\\operatorname...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 0 - 0
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-35" class="tab-content ">
+<div class="zeno-sample-card incorrect">
+<div class="zeno-sample-header">
+<span class="sample-status">❌ Sample 1</span>
+<span class="sample-task">IFEVAL</span>
+</div>
+<div class="zeno-sample-content">
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Write a 300+ word summary of the wikipedia page "https://en.wikipedia.org/wiki/Raymond_III,_Count_of_Tripoli". Do not use any commas and highlight at least 3 sections that has titles in markdown format, for example *highlighted section part 1*, *highlighted section part 2*, *highlighted section part 3*.</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Type</h4>
+<div class="direct-answer-note">This is a direct answer task (Instruction Following) - no multiple choice options.</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-incorrect">
+<div class="response-header">
+<span class="response-icon">❌</span>
+<span class="response-status">Incorrect</span>
+</div>
+<div class="response-content">
+<strong>Raw Response:</strong> [[' Raymond III Count of Tripoli was born around 1150 and died in 1197. He was the son of Raymond II Count of Tripoli and his wife Agnes de Montferrat. He succeeded his father as count of Tripoli in 1...
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 0 - 0
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-36" class="tab-content ">
+<div class="zeno-sample-card correct">
+<div class="zeno-sample-header">
+<span class="sample-status">✅ Sample 1</span>
+<span class="sample-task">MUSR_MURDER_MYSTERIES</span>
+</div>
+<div class="zeno-sample-content">
+<div class="narrative-section">
+<h4 class="section-label">📚 Narrative</h4>
+<div class="narrative-text">In an adrenaline inducing bungee jumping site, Mack's thrill-seeking adventure came to a gruesome end by a nunchaku; now, it's up to Detective Winston to unravel the deadly secrets between Mackenzie and Ana.
+
+Winston took a gulp of his black coffee, staring at the notes sprawled across his desk. A murder case at a bungee jumping site was definitely out of the ordinary. Today's victim was a young man named Mack, loud mouthed and cocky by all accounts. 
+
+Mack was bungee jumping the day he was killed. Oddly enough, according to the records, no one else was documented at the bungee jumping site that day, making this case even more peculiar. The first stop for the day was to visit one of Mack's housemates, a woman named Ana. They were seen leaving in the same vehicle from their shared housing complex the morning of the murder, and it was time for Winston to dig deeper. 
+
+As he pulled into the shared housing driveway, a nondescript car came into sight. He learned from neighbours that it was frequently used by multiple residents, but Ana had a peculiar interest in it. She would insist on driving whenever with a group of friends, later meticulously cleaning the car after each use. An idiosyncrasy of hers maybe, but a part of the puzzle nonetheless.
+
+Winston knocked on the door, Ana opened it warily, twiddling a cleaning cloth and spray in her hands and greeted him with a nervous nod. Ana gets nervous and fidgets with the cleaner and cloth when questioned. Winston could sense palpable unease as he started asking her questions.
+
+"Ana, did you not join Mack and the others for bungee jumping today?" Winston questioned, to which she responded, "I signed up to jump. But I didn't end up going through with it."
+
+"Any particular reason you didn't join the others, Ana?" Winston proceeded. 
+
+Ana took a deep breath, "Well sir, my faith doesn't really permit bungee jumping. Truth be told, I was persuaded strongly by Mack. I had even signed up out of peer pressure but couldn't push myself."
+
+It was true – Mack was insisting that everyone in the group should bungee jump. Mack had reportedly also been vocal about ridiculing Ana’s faith, even encouraging others to join him in doing so. It was a significant factor in their relationship.
+
+"Ana, did you and Mack leave in the same car for the bungee jumping event this morning?" Winston gently pushed further.
+
+"Yes. Yes, we did. We always carpool." She responded while anxiously using the cleaner and cloth on her car’s dashboard. Her eyes flickered nervously back to Winston, expecting the next question.
+
+Winston took a deep breath, standing up to leave, "Alright Ana, that should cover everything for now. We'll be in touch."
+
+Ana nervously nodded without looking up from her cleaning, wringing the cloth repeatedly as Winston walked away, left again with another piece to the enigmatic puzzle of Mack's murder.
+
+The day was getting older and Winston was getting more tired, but the case was fresh, and he wasn't one to back down. He tugged on his coat as he approached the bashful teen waiting for him by the police station.
+
+"Mackenzie, it is?" he asked, extending his hand.
+
+"Yeah, that's right." The slight lisp, overlaid with blanket anxiety, confirmed what the school reports suggested.
+
+"You were at the site when Mack... erm... you know," Winston's voice was methodical, calm -- almost robotic. The suspicion on Mackenzie was not unfounded - the security cameras showed him buying nunchaku a week before. 
+
+Mackenzie shifted on his feet, looking away before answering, "Yeah, I was there."
+
+Winston pulled out a small notebook, "What were you doing there, Mackenzie?”
+
+“Bungee jumping, like Mack… Then I left. I didn't... I didn't do anything…” Mackenzie replied.
+
+Internally, Winston sighed at the never-ending waterfall of teenage angst this case was turning into. 
+
+“Martial arts, huh?” Winston segued, gesturing to a bruise on Mackenzie’s knuckles. “Nunchaku particularly, I see? Training does include the use of those, correct?” 
+
+The change in Mackenzie’s demeanor mirrored the bitterness in the last month’s weather – dark eyes replaced with ice-cold ones. “Yeah,” he admitted, shrinking slightly.
+
+Mackenzie always took pride in being the best at everything. So when Mack got everything he wanted - the promotion to team captain, the respect, the attention - it was a hard pill for Mackenzie to swallow. Winston remembered the team talk, Mackenzie was indeed the top candidate but it had gone to Mack instead. 
+
+What clinched it was Mackenzie’s remarks about Mack, echoing whispers of dispute and bickering, lost in the crowded lunchroom. There were also multiple witness reports of the two seen arguing at the bungee jumping site previously. Mackenzie had indeed said disparaging, almost emotional things about Mack – all stemming from a potent brew of jealousy, Winston inferred.
+
+Shifting later through the detritus of Mackenzie's life, Winston discovered the nunchaku that matched the forensics report. They were tucked away, but the layer of dust suggested they weren't a favored possession anymore. It wasn’t hidden, it was misplaced – discarded in the throes of developing maturity.
+
+As the sun started to set, Winston could see witnesses, scattered across the park, repeatedly pointing to the bungee jumping scaffolding. It occurred to him, then, the narrative of the past days. Mackenzie, jealous and wronged, over and over, at the same sight. It was quite a sight. 
+
+Winston, shuffling back to the station, was left with one thought - Looks like Mackenzie had quite an eventful week.</div>
+</div>
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Who is the most likely murderer?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option choice-correct choice-selected">
+<div class="choice-label">1</div>
+<div class="choice-text">Mackenzie</div>
+<div class="choice-indicators">✓ Correct • 🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">2</div>
+<div class="choice-text">Ana</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-correct">
+<div class="response-header">
+<span class="response-icon">✅</span>
+<span class="response-status">Correct</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> 1 - Mackenzie
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 1 - Mackenzie
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item selected-confidence">
+<span class="conf-label">1:</span>
+<span class="conf-score">-2.7969</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">2:</span>
+<span class="conf-score">-10.5625</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-37" class="tab-content ">
+<div class="zeno-sample-card correct">
+<div class="zeno-sample-header">
+<span class="sample-status">✅ Sample 1</span>
+<span class="sample-task">MUSR_OBJECT_PLACEMENTS</span>
+</div>
+<div class="zeno-sample-content">
+<div class="narrative-section">
+<h4 class="section-label">📚 Narrative</h4>
+<div class="narrative-text">In the heart of the bustling studio, Ricky, Emma, and Danny readied themselves for a day of creating magic. Ricky, holding the helm as the gifted singer-songwriter, was poised for perfection, his precious notebook of lyrics awaiting its call to duty on the producer's desk. Emma, their dutiful and talented producer, was just as eager to breathe life into Ricky's lyrics. She was cognizant of the notebook's place at her desk, awaiting the melodies they would cultivate together.
+
+Across the room, Danny, the diligent studio assistant, was doing his due diligence, keeping the earphones nestled in the recording booth. His aim was to ensure an optimized and meticulous environment for recording, a testament to his commitment to their shared mission. They were all aware of the arrangement — the notebook on the producer's desk, the earphones in the recording booth. Their shared consciousness of these items only intensified the anticipation; they were eager to turn the contents of a weathered notebook into a world-class album.
+
+Ricky, with his weathered notebook of potent lyrics in hand, gently places it onto the piano. An air of creativity and anticipation lingers in the room, everyone aware that this was the first instrumental step in the creation of their masterpiece. In sync with the palpable creative energy, Ricky was engrossed in perfecting the rhythm of his song, preparing himself for an intense day ahead. Not too far away, Emma was sincerely engrossed in her role of musically steering the session. She was focussed on Ricky’s progress, her eyes constantly monitoring him and her mind alive with ideas to enhance the music. 
+
+Meanwhile, Danny was diligently covering every corner of the studio. He was making his rounds, ensuring that the studio was prim and proper for Ricky’s crucial session. As part of his tasks, he passed by Ricky several times, always careful not to interrupt the artist's flow.
+
+
+Emma, engrossed in her thoughts, deftly moves the earphones to the producer's desk. She is preparing to tweak the sound settings, pre-empting Ricky's need for perfect audio in his performance. Diverting from his rounds, Danny found himself in the midst of a stirring conversation with a visiting sound engineer. Knowledge flowed between them, illuminating the studio's atmosphere, the engineer's insight bringing a new perspective into Danny's role. Ricky, ensconced in his own world, was in deep discussion with the blank page before him. The daunting silence of the empty studio buzzed with his focus, as he honed his lyrics to perfection in a space separate from the producer's. The visitor, oblivious to the careful choreography of the studio session, stood blocking Danny's general overview of the studio space.
+
+Delicately lifting Ricky's notebook, Danny orchestrates its move to the producer's desk. At the desk, he glimpses a pair of earphones indirectly drawing his attention amidst his routine of tidying up. Emma, from the isolated interior of a sound-proofed booth, lent her ears diligently to already recorded tracks, pouring over them for any room for improvement. Being lost in the music was her way of paying homage to her craft - an unspoken ritual she followed each time she embarked on a music production journey. The entirety of her focus was consumed by the musical notes and rhythm filtering through the studio speakers.
+
+Concurrently, Ricky was absorbed in the act of playing his guitar. His fingers navigated deftly over the strings, lost in an intimate dance with the instrument. As he played, the melodic strums reverberated throughout the studio, filling it with an infectious pulse that hinted at the birth of yet another musical masterpiece. Despite the flurry of activity around him, Ricky was lost in a world of his own, operating on a singular vision of delivering his best performance.
+
+In the meantime, Danny was continuing his cautious management of the studio, ensuring that everything fell into place for the optimum recording session. His watchful eyes were scanning every corner, taking stock of the minor details that could impact the session. However, the design of the studio didn't allow for an unrestricted view into all the corners. The sound booth, where Emma was engrossed in her work, was out of his visual range. The seclusion provided by the booth, although crucial for immersive work, also acted as a barrier for Danny's comprehensive vigilance.
+
+As the day progressed, the studio was entwined in a concerted symphony of dedication and workmanship, the trio, each engrossed in their pursuit, working together to create the best version of Ricky's impending album. As the final note of the day rang through the studio, each person revelled in the satisfaction of another day done right, another step closer towards the realization of Ricky's artistic vision.
+
+Within the dynamic dance of the day's events, the relationships of the trio sang a compelling tune. Each individual played their crucial part in the creation of the impending masterpiece - Ricky with his raw talent, Emma with her passion for perfection, and Danny with his meticulous eye for detail. And as the lights faded on another day of creation, they could sense the beginning of an important chapter in their artistry, a silence collecting the scattered notes of the day, signing off on another critical step in the journey of Ricky's upcoming album.</div>
+</div>
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Which location is the most likely place Danny would look to find the earphones given the story?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">1</div>
+<div class="choice-text">piano</div>
+</div>
+<div class="zeno-choice-option choice-correct choice-selected">
+<div class="choice-label">2</div>
+<div class="choice-text">producer's desk</div>
+<div class="choice-indicators">✓ Correct • 🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">3</div>
+<div class="choice-text">recording booth</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-correct">
+<div class="response-header">
+<span class="response-icon">✅</span>
+<span class="response-status">Correct</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> 2 - producer's desk
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 2 - producer's desk
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">1:</span>
+<span class="conf-score">-19.2500</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">2:</span>
+<span class="conf-score">-16.5000</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">3:</span>
+<span class="conf-score">-20.0000</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="task-38" class="tab-content ">
+<div class="zeno-sample-card correct">
+<div class="zeno-sample-header">
+<span class="sample-status">✅ Sample 1</span>
+<span class="sample-task">MUSR_TEAM_ALLOCATION</span>
+</div>
+<div class="zeno-sample-content">
+<div class="narrative-section">
+<h4 class="section-label">📚 Narrative</h4>
+<div class="narrative-text">Amidst the vibrant chaos of the Redwood Zoo, nestled in the heart of the city's sprawling jungle, the task of assigning roles was a crucial cog in the machinery of its operation. As the manager, the responsibility of allocating Olivia, Alex, and Mia to the positions of Animal Caretaker and Exhibit Cleaner presented an intriguing conundrum. Each individual, with their distinct personalities and skill sets, added a layer of complexity to this assignment puzzle.
+
+Let's begin with Alex, the tall lad with bright eyes, whose history with the mighty beast of the animal kingdom, lacked a certain comfort. The lad, known to express an almost innate unease around animals larger than him, fell short of the prerequisites for an Animal Caretaker. His comfort zone extended to the four-legged companions in our homes, a sentiment I withheld from the petting zoo section of our park. Yet, his association and collaboration with Mia had seen quite the successes in their high school club's fundraising initiatives.
+
+However, his relationship with the gentle Olivia was not as seamless. Alex often mentioned feeling ostracized due to Olivia's tendency to maintain her distance. This seemingly innocent avoidance stirred disquiet within our hushed ranks. And all this, stemming from a disagreement rooted in their previous shared workplaces. Unresolved perhaps, but a factor nonetheless.
+
+Then, there was Mia, the determined bright spark, whose affinity for cleanliness would often bemuse us. She would spend her spare time in her immaculate home cleaning and reorganizing, while her enthusiasm for a spotless Exhibit could not be underestimated. However, her overly thorough methods would invariably result in clashes with Olivia, who criticized her for crossing some form of unspoken boundary.
+
+Mia too had her phobias, the gravelly roars of the zoo's majestic lion had once left her shaken and worried. Loud noises had a similar effect leaving her in a state of nervous terror, much like that of the petite animals held within our barriers. Yet, she was all smiles and peasant conversation around Alex during lunch breaks, sharing a sense of humor that lightened the mood of our everyday grind.
+
+Finally, subdued Olivia, a soul strangled with allergies, and a deep-seated fear for wild animals. An incident with a chimp in her past wove tales of nightmarish betrayal, enough to send her away from the animal exhibits during her zoo visits. Potent elements of dust and pollen resulted in uncontrolled sneezing fits, a remainder from her days at the school as a custodian, responsible for the cleanliness and maintenance.
+
+Three souls; Animals to be cared for, Exhibits to be cleaned. Assigning them was always going to be an enigma for anyone navigating the zoological labyrinth. Love for animals, discomfort, alliances, conflicts; each factor extraordinarily crucial in shaping not just the overall productivity but also the personal growth of each of these individuals at the Redwood Zoo.</div>
+</div>
+<div class="question-section">
+<h4 class="section-label">❓ Question</h4>
+<div class="question-text">Given the story, how would you uniquely allocate each person to make sure both tasks are accomplished efficiently?</div>
+</div>
+<div class="choices-section">
+<h4 class="section-label">📋 Answer Choices</h4>
+<div class="zeno-choice-grid">
+<div class="zeno-choice-option">
+<div class="choice-label">1</div>
+<div class="choice-text">Animal Caretaker: Alex, Exhibit Cleaner: Mia and Olivia</div>
+</div>
+<div class="zeno-choice-option choice-correct choice-selected">
+<div class="choice-label">2</div>
+<div class="choice-text">Animal Caretaker: Olivia, Exhibit Cleaner: Alex and Mia</div>
+<div class="choice-indicators">✓ Correct • 🤖 Selected</div>
+</div>
+<div class="zeno-choice-option">
+<div class="choice-label">3</div>
+<div class="choice-text">Animal Caretaker: Mia, Exhibit Cleaner: Alex and Olivia</div>
+</div>
+</div>
+</div>
+<div class="response-section">
+<h4 class="section-label">🤖 Model Response</h4>
+<div class="model-response response-correct">
+<div class="response-header">
+<span class="response-icon">✅</span>
+<span class="response-status">Correct</span>
+</div>
+<div class="response-content">
+<strong>Answer:</strong> 2 - Animal Caretaker: Olivia, Exhibit Cleaner: Alex and Mia
+</div>
+</div>
+</div>
+<div class="correct-answer-section">
+<h4 class="section-label">✅ Correct Answer</h4>
+<div class="correct-answer">
+<div class="answer-content">
+<strong>Answer:</strong> 2 - Animal Caretaker: Olivia, Exhibit Cleaner: Alex and Mia
+</div>
+</div>
+</div>
+<div class="confidence-section">
+<h4 class="section-label">📊 Model Confidence</h4>
+<div class="confidence-scores">
+<div class="confidence-item ">
+<span class="conf-label">1:</span>
+<span class="conf-score">-11.5625</span>
+</div>
+<div class="confidence-item selected-confidence">
+<span class="conf-label">2:</span>
+<span class="conf-score">-9.3125</span>
+</div>
+<div class="confidence-item ">
+<span class="conf-label">3:</span>
+<span class="conf-score">-9.9375</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Generated by Professional LLM Evaluation Framework</p>
+            <p>This report contains comprehensive AI model performance metrics and analysis</p>
+        </div>
+    </footer>
+
+    <div class="watermark">
+        💎 Professional AI Eval
+    </div>
+
+    <script>
+        // Initialize charts and interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            initializeTabs();
+            animateProgressBars();
+        });
+
+        function initializeCharts() {
+            // Performance overview chart
+            const ctx = document.getElementById('performanceChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {"labels": ["leaderboard_bbh_boolean_expressions", "leaderboard_bbh_causal_judgement", "leaderboard_bbh_date_understanding", "leaderboard_bbh_disambiguation_qa", "leaderboard_bbh_formal_fallacies", "leaderboard_bbh_geometric_shapes", "leaderboard_bbh_hyperbaton", "leaderboard_bbh_logical_deduction_five_objects", "leaderboard_bbh_logical_deduction_seven_objects", "leaderboard_bbh_logical_deduction_three_objects", "leaderboard_bbh_movie_recommendation", "leaderboard_bbh_navigate", "leaderboard_bbh_object_counting", "leaderboard_bbh_penguins_in_a_table", "leaderboard_bbh_reasoning_about_colored_objects", "leaderboard_bbh_ruin_names", "leaderboard_bbh_salient_translation_error_detection", "leaderboard_bbh_snarks", "leaderboard_bbh_sports_understanding", "leaderboard_bbh_temporal_sequences", "leaderboard_bbh_tracking_shuffled_objects_five_objects", "leaderboard_bbh_tracking_shuffled_objects_seven_objects", "leaderboard_bbh_tracking_shuffled_objects_three_objects", "leaderboard_bbh_web_of_lies", "leaderboard_gpqa_diamond", "leaderboard_gpqa_extended", "leaderboard_gpqa_main", "leaderboard_ifeval", "leaderboard_mmlu_pro", "leaderboard_musr_murder_mysteries", "leaderboard_musr_object_placements", "leaderboard_musr_team_allocation"], "datasets": [{"label": "Performance (%)", "data": [100.0, 0.0, 100.0, 100.0, 100.0, 100.0, 0.0, 100.0, 100.0, 100.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0, 100.0, 100.0, 100.0, 100.0, 100.0], "borderColor": "rgb(37, 99, 235)", "backgroundColor": "rgba(37, 99, 235, 0.2)", "borderWidth": 2}]},
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Performance Overview'
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Task comparison chart
+            const ctx2 = document.getElementById('taskChart');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'bar',
+                    data: {"labels": ["leaderboard_bbh_boolean_expressions", "leaderboard_bbh_causal_judgement", "leaderboard_bbh_date_understanding", "leaderboard_bbh_disambiguation_qa", "leaderboard_bbh_formal_fallacies", "leaderboard_bbh_geometric_shapes", "leaderboard_bbh_hyperbaton", "leaderboard_bbh_logical_deduction_five_objects", "leaderboard_bbh_logical_deduction_seven_objects", "leaderboard_bbh_logical_deduction_three_objects", "leaderboard_bbh_movie_recommendation", "leaderboard_bbh_navigate", "leaderboard_bbh_object_counting", "leaderboard_bbh_penguins_in_a_table", "leaderboard_bbh_reasoning_about_colored_objects", "leaderboard_bbh_ruin_names", "leaderboard_bbh_salient_translation_error_detection", "leaderboard_bbh_snarks", "leaderboard_bbh_sports_understanding", "leaderboard_bbh_temporal_sequences", "leaderboard_bbh_tracking_shuffled_objects_five_objects", "leaderboard_bbh_tracking_shuffled_objects_seven_objects", "leaderboard_bbh_tracking_shuffled_objects_three_objects", "leaderboard_bbh_web_of_lies", "leaderboard_gpqa_diamond", "leaderboard_gpqa_extended", "leaderboard_gpqa_main", "leaderboard_ifeval", "leaderboard_mmlu_pro", "leaderboard_musr_murder_mysteries", "leaderboard_musr_object_placements", "leaderboard_musr_team_allocation"], "datasets": [{"label": "Accuracy (%)", "data": [100.0, 0.0, 100.0, 100.0, 100.0, 100.0, 0.0, 100.0, 100.0, 100.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 100.0, 100.0, 100.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0, 100.0, 100.0, 100.0, 100.0, 100.0], "backgroundColor": ["rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(239, 68, 68, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)", "rgba(16, 185, 129, 0.8)"], "borderColor": ["rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(239, 68, 68)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(239, 68, 68)", "rgb(239, 68, 68)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(239, 68, 68)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)", "rgb(16, 185, 129)"], "borderWidth": 2}]},
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Task Performance Breakdown'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+        }
+
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }
+    </script>
+</body>
+</html>
