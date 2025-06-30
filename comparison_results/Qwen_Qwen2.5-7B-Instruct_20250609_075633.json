@@ -1,0 +1,252 @@
+{
+  "model_name": "Qwen/Qwen2.5-7B-Instruct",
+  "timestamp": "2025-06-09T07:56:33.707210",
+  "results": {
+    "leaderboard": {
+      " ": " ",
+      "alias": "leaderboard"
+    },
+    "leaderboard_bbh": {
+      " ": " ",
+      "alias": " - leaderboard_bbh"
+    },
+    "leaderboard_bbh_boolean_expressions": {
+      "alias": "  - leaderboard_bbh_boolean_expressions",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_causal_judgement": {
+      "alias": "  - leaderboard_bbh_causal_judgement",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_date_understanding": {
+      "alias": "  - leaderboard_bbh_date_understanding",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_disambiguation_qa": {
+      "alias": "  - leaderboard_bbh_disambiguation_qa",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_formal_fallacies": {
+      "alias": "  - leaderboard_bbh_formal_fallacies",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_geometric_shapes": {
+      "alias": "  - leaderboard_bbh_geometric_shapes",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_hyperbaton": {
+      "alias": "  - leaderboard_bbh_hyperbaton",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_logical_deduction_five_objects": {
+      "alias": "  - leaderboard_bbh_logical_deduction_five_objects",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_logical_deduction_seven_objects": {
+      "alias": "  - leaderboard_bbh_logical_deduction_seven_objects",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_logical_deduction_three_objects": {
+      "alias": "  - leaderboard_bbh_logical_deduction_three_objects",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_movie_recommendation": {
+      "alias": "  - leaderboard_bbh_movie_recommendation",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_navigate": {
+      "alias": "  - leaderboard_bbh_navigate",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_object_counting": {
+      "alias": "  - leaderboard_bbh_object_counting",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_penguins_in_a_table": {
+      "alias": "  - leaderboard_bbh_penguins_in_a_table",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_reasoning_about_colored_objects": {
+      "alias": "  - leaderboard_bbh_reasoning_about_colored_objects",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_ruin_names": {
+      "alias": "  - leaderboard_bbh_ruin_names",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_salient_translation_error_detection": {
+      "alias": "  - leaderboard_bbh_salient_translation_error_detection",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_snarks": {
+      "alias": "  - leaderboard_bbh_snarks",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_sports_understanding": {
+      "alias": "  - leaderboard_bbh_sports_understanding",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_temporal_sequences": {
+      "alias": "  - leaderboard_bbh_temporal_sequences",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_tracking_shuffled_objects_five_objects": {
+      "alias": "  - leaderboard_bbh_tracking_shuffled_objects_five_objects",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_tracking_shuffled_objects_seven_objects": {
+      "alias": "  - leaderboard_bbh_tracking_shuffled_objects_seven_objects",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_tracking_shuffled_objects_three_objects": {
+      "alias": "  - leaderboard_bbh_tracking_shuffled_objects_three_objects",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_bbh_web_of_lies": {
+      "alias": "  - leaderboard_bbh_web_of_lies",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_gpqa": {
+      " ": " ",
+      "alias": " - leaderboard_gpqa"
+    },
+    "leaderboard_gpqa_diamond": {
+      "alias": "  - leaderboard_gpqa_diamond",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_gpqa_extended": {
+      "alias": "  - leaderboard_gpqa_extended",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_gpqa_main": {
+      "alias": "  - leaderboard_gpqa_main",
+      "acc_norm,none": 0.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_ifeval": {
+      "alias": " - leaderboard_ifeval",
+      "prompt_level_strict_acc,none": 1.0,
+      "prompt_level_strict_acc_stderr,none": "N/A",
+      "inst_level_strict_acc,none": 1.0,
+      "inst_level_strict_acc_stderr,none": "N/A",
+      "prompt_level_loose_acc,none": 1.0,
+      "prompt_level_loose_acc_stderr,none": "N/A",
+      "inst_level_loose_acc,none": 1.0,
+      "inst_level_loose_acc_stderr,none": "N/A"
+    },
+    "leaderboard_math_hard": {
+      " ": " ",
+      "alias": " - leaderboard_math_hard"
+    },
+    "leaderboard_math_algebra_hard": {
+      "alias": "  - leaderboard_math_algebra_hard",
+      "exact_match,none": 1.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_math_counting_and_prob_hard": {
+      "alias": "  - leaderboard_math_counting_and_prob_hard",
+      "exact_match,none": 1.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_math_geometry_hard": {
+      "alias": "  - leaderboard_math_geometry_hard",
+      "exact_match,none": 1.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_math_intermediate_algebra_hard": {
+      "alias": "  - leaderboard_math_intermediate_algebra_hard",
+      "exact_match,none": 0.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_math_num_theory_hard": {
+      "alias": "  - leaderboard_math_num_theory_hard",
+      "exact_match,none": 1.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_math_prealgebra_hard": {
+      "alias": "  - leaderboard_math_prealgebra_hard",
+      "exact_match,none": 0.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_math_precalculus_hard": {
+      "alias": "  - leaderboard_math_precalculus_hard",
+      "exact_match,none": 0.0,
+      "exact_match_stderr,none": "N/A"
+    },
+    "leaderboard_mmlu_pro": {
+      "alias": " - leaderboard_mmlu_pro",
+      "acc,none": 1.0,
+      "acc_stderr,none": "N/A"
+    },
+    "leaderboard_musr": {
+      " ": " ",
+      "alias": " - leaderboard_musr"
+    },
+    "leaderboard_musr_murder_mysteries": {
+      "alias": "  - leaderboard_musr_murder_mysteries",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_musr_object_placements": {
+      "alias": "  - leaderboard_musr_object_placements",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    },
+    "leaderboard_musr_team_allocation": {
+      "alias": "  - leaderboard_musr_team_allocation",
+      "acc_norm,none": 1.0,
+      "acc_norm_stderr,none": "N/A"
+    }
+  },
+  "config": {
+    "model": "hf",
+    "model_args": "pretrained=Qwen/Qwen2.5-7B-Instruct",
+    "model_num_parameters": 7615616512,
+    "model_dtype": "torch.bfloat16",
+    "model_revision": "main",
+    "model_sha": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "batch_size": 1,
+    "batch_sizes": [],
+    "device": "cuda:1",
+    "use_cache": null,
+    "limit": 1,
+    "bootstrap_iters": 100000,
+    "gen_kwargs": null,
+    "random_seed": 0,
+    "numpy_seed": 1234,
+    "torch_seed": 1234,
+    "fewshot_seed": 1234
+  },
+  "model_info": {
+    "name": "hf",
+    "type": "Unknown",
+    "architecture": "Unknown",
+    "size": "Unknown"
+  }
+}
